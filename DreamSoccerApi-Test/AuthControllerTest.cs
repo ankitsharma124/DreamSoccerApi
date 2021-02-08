@@ -1,9 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
+using DreamSoccer.Core.Contracts.Repositories;
+using DreamSoccer.Core.Dtos.User;
+using DreamSoccer.Core.Entities;
+using DreamSoccer.Core.Responses;
 using DreamSoccerApi.Controllers;
-using DreamSoccerApi.Data;
-using DreamSoccerApi.Dtos.User;
-using DreamSoccerApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;

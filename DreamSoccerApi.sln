@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.808.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccerApi", "DreamSoccerApi\DreamSoccerApi.csproj", "{7C52F10C-2A64-4023-939B-2A30FBAB6766}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccerApi", "DreamSoccerApi\DreamSoccerApi.csproj", "{7C52F10C-2A64-4023-939B-2A30FBAB6766}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccerApi-Test", "DreamSoccerApi-Test\DreamSoccerApi-Test.csproj", "{8315A5C2-B5B1-467D-BA38-FF912A879B3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccerApi-Test", "DreamSoccerApi-Test\DreamSoccerApi-Test.csproj", "{8315A5C2-B5B1-467D-BA38-FF912A879B3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Core", "DreamSoccer.Core\DreamSoccer.Core.csproj", "{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Services", "DreamSoccer.Services\DreamSoccer.Services.csproj", "{C6555361-098F-4863-A4F0-1B87EB8181E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Repository", "DreamSoccer.Repository\DreamSoccer.Repository.csproj", "{FEC1D9AE-A437-421F-9D18-7B59614E2454}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +27,18 @@ Global
 		{8315A5C2-B5B1-467D-BA38-FF912A879B3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8315A5C2-B5B1-467D-BA38-FF912A879B3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8315A5C2-B5B1-467D-BA38-FF912A879B3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6555361-098F-4863-A4F0-1B87EB8181E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6555361-098F-4863-A4F0-1B87EB8181E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6555361-098F-4863-A4F0-1B87EB8181E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6555361-098F-4863-A4F0-1B87EB8181E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

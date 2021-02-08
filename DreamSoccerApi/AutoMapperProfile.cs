@@ -1,5 +1,4 @@
 using AutoMapper;
-using DreamSoccerApi.Models;
 
 namespace DreamSoccer
 {

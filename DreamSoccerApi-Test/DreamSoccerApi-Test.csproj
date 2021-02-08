@@ -22,6 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DreamSoccer.Core\DreamSoccer.Core.csproj" />
+    <ProjectReference Include="..\DreamSoccer.Repository\DreamSoccer.Repository.csproj" />
+    <ProjectReference Include="..\DreamSoccer.Services\DreamSoccer.Services.csproj" />
     <ProjectReference Include="..\DreamSoccerApi\DreamSoccerApi.csproj" />
   </ItemGroup>
 </Project>

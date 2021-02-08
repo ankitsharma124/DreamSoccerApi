@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DreamSoccerApi.Dtos.User
+namespace DreamSoccer.Core.Dtos.User
 {
     public class UserLoginDto
     {
@@ -8,6 +8,6 @@ namespace DreamSoccerApi.Dtos.User
         [EmailAddress(ErrorMessage = "Email Address is invalid")]
         public string Email { get; set; }
         [Required(ErrorMessage = "Password is Required")]
-        public string Password {get; set;}
+        public string Password { get; set; }
     }
 }
