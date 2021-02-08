@@ -8,7 +8,7 @@ using DreamSoccer.Core.Responses;
 
 namespace DreamSoccer.Core.Contracts.Services
 {
-    public class UserService : IUserService
+    public class UserService : BaseService, IUserService
     {
         const long DEFAULT_BUDGET_TEAM = 5000000;
         const long DEFAULT_VALUE_PLAYER = 1000000;

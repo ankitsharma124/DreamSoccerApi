@@ -36,9 +36,11 @@ namespace DreamSoccer.Repository.Context
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new TeamConfiguration());
             modelBuilder.ApplyConfiguration(new PlayerConfiguration());
+            modelBuilder.ApplyConfiguration(new TransferListConfiguration());
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Team> Teams { get; set; }
-        public DbSet<Player> Player { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<TransferList> TransferLists { get; set; }
     }
 }

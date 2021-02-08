@@ -42,6 +42,7 @@ namespace DreamSoccerApi
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<ITeamRepository, TeamRepository>();
+            services.AddScoped<ITransferListRepository, TransferListRepository>();
             services.AddScoped<IRandomRepository, RandomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             

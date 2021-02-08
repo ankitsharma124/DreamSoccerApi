@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using DreamSoccer.Core.Configurations;
 
-namespace DreamSoccerApi_Test
+namespace DreamSoccer.Services.Test.Helpers
 {
     public class AutoMapperHelper
     {

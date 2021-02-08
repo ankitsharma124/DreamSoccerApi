@@ -16,21 +16,36 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace DreamSoccerApi.Controllers
 {
+    public class SoccerControllerBase : ControllerBase
+    {
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+
+        public SoccerControllerBase(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+        public string CurrentEmail
+        {
+            get
+            {
+                return _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(n => n.Type == ClaimTypes.Name).Value;
+            }
+        }
+    }
     [ApiController]
     [Route("[controller]")]
-    public class TeamController : ControllerBase
+    public class TeamController : SoccerControllerBase
     {
         private readonly ITeamService _teamService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public TeamController(ITeamService teamService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _teamService = teamService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         #region Signup
+
         [HttpGet("GetMyPlayers")]
         [Authorize(Roles = "Team_Owner")]
         public async Task<IActionResult> GetMyPlayersAsync()
@@ -38,7 +53,7 @@ namespace DreamSoccerApi.Controllers
             var response = new ServiceResponse<IEnumerable<PlayerDto>>();
             try
             {
-                var email = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(n => n.Type == ClaimTypes.Name).Value;
+                var email = CurrentEmail;
                 var players = await _teamService.GetMyTeamAsync(email);
                 response.Data = players;
                 if (response.Success && players.Any())
@@ -48,6 +63,34 @@ namespace DreamSoccerApi.Controllers
                 else
                 {
                     return NotFound(response);
+                }
+            }
+            catch (Exception exception)
+            {
+                response.Message = exception.Message;
+                response.Success = false;
+                return BadRequest(response);
+            }
+
+        }
+
+        [HttpPost("AddPlayerToMarket")]
+        [Authorize(Roles = "Team_Owner")]
+        public async Task<IActionResult> AddPlayerToMarketAsycn(AddTransferListRequest request)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                var email = CurrentEmail;
+                var result = await _teamService.AddPlayerToMarket(email, request.PlayerId, request.Price);
+                response.Data = result;
+                if (response.Success && result)
+                {
+                    return Ok(response);
+                }
+                else
+                {
+                    return BadRequest(response);
                 }
             }
             catch (Exception exception)

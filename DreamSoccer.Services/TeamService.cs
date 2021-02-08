@@ -8,17 +8,25 @@ using DreamSoccer.Core.Entities;
 
 namespace DreamSoccer.Core.Contracts.Services
 {
-    public class TeamService : ITeamService
+    public class TeamService : BaseService, ITeamService
     {
         private IMapper _mapper;
         private IUserRepository _userRepository;
         private IPlayerRepository _playerRepository;
+        private readonly ITransferListRepository _transferListRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TeamService(IMapper mapper, IUserRepository userRepository, IPlayerRepository playerRepository)
+        public TeamService(IMapper mapper,
+            IUserRepository userRepository,
+            IPlayerRepository playerRepository,
+            ITransferListRepository transferListRepository,
+            IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _playerRepository = playerRepository;
+            _transferListRepository = transferListRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IEnumerable<PlayerDto>> GetMyTeamAsync(string email)
@@ -31,6 +39,26 @@ namespace DreamSoccer.Core.Contracts.Services
             }
             return new List<PlayerDto>();
 
+        }
+
+        public async Task<bool> AddPlayerToMarket(string owner, int playerId, long price)
+        {
+            var user = await _userRepository.GetByEmailAsync(owner);
+            if (user == null)
+            {
+                CurrentMessage = "User doesn't exist";
+                return false;
+            }
+            var player = await _playerRepository.GetByIdAsync(playerId);
+            if (player!=null  && player.Team.Owner.Email == user.Email)
+            {
+                var model = new TransferList() { Player = player, Value = price };
+                await _transferListRepository.CreateAsync(model);
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+            }
+            CurrentMessage = "Player not in our Team";
+            return false;
         }
     }
 }
