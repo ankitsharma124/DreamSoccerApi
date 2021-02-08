@@ -14,6 +14,8 @@ namespace DreamSoccer.Repository.Context
         {
             _fakePlayer = new Faker<Player>()
                 .RuleFor(u => u.FirstName, (f, u) => f.Name.FirstName())
+                .RuleFor(u => u.Country, (f, u) => f.Address.Country())
+                .RuleFor(u => u.Age, (f, u) => f.Random.Int(18, 40))
                 .RuleFor(u => u.LastName, (f, u) => f.Name.LastName());
             _teamPlayer = new Faker<Team>()
                .RuleFor(u => u.Country, (f, u) => f.Address.Country())

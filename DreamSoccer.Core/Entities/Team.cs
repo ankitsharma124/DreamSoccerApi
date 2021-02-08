@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DreamSoccer.Core.Dtos;
+using System.Collections.Generic;
 
 namespace DreamSoccer.Core.Entities
 {

@@ -27,7 +27,8 @@ namespace DreamSoccer.Core.Contracts.Services
             IMapper mapper,
             ITeamRepository teamRepository,
             IUnitOfWork unitOfWork,
-            IRandomRepository randomRepository)
+            IRandomRepository randomRepository
+            )
         {
             _authRepository = authRepository;
             _mapper = mapper;
@@ -45,7 +46,8 @@ namespace DreamSoccer.Core.Contracts.Services
         {
             try
             {
-                var userId = await _authRepository.RegisterAsync(_mapper.Map<User>(user), password);
+                var newUser = _mapper.Map<User>(user);
+                var userId = await _authRepository.RegisterAsync(newUser, password);
                 var team = await _randomRepository.GetRandomTeam();
                 team.Budget = DEFAULT_BUDGET_TEAM;
                 await GeneratePlayers(team, COUNT_GOAL_KEEPERS, Entities.Enums.PositionEnum.Goalkeepers);
@@ -53,8 +55,13 @@ namespace DreamSoccer.Core.Contracts.Services
                 await GeneratePlayers(team, COUNT_MIDIFIELDERS, Entities.Enums.PositionEnum.Midfielders);
                 await GeneratePlayers(team, COUNT_DEFENDERS, Entities.Enums.PositionEnum.Defenders);
                 await _teamRepository.CreateAsync(team);
+                newUser.Team = team;
                 await _unitOfWork.SaveChangesAsync();
-                return userId;
+                return new ServiceResponse<int>()
+                {
+                    Success = true,
+                    Data = newUser.Id
+                };
             }
             catch (Exception exeption)
             {

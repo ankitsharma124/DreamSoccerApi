@@ -1,3 +1,5 @@
+using DreamSoccer.Core.Dtos;
+
 namespace DreamSoccer.Core.Entities
 {
     public class User : BaseEntity
