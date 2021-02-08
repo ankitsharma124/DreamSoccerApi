@@ -24,7 +24,7 @@ namespace DreamSoccer.Repository.Implementations
             _context = context;
             _configuration = configuration;
         }
-        public async Task<ServiceResponse<string>> Login(string email, string password)
+        public async Task<ServiceResponse<string>> LoginAsync(string email, string password)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
             User user = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(email.ToLower()));
@@ -45,10 +45,10 @@ namespace DreamSoccer.Repository.Implementations
             return response;
         }
 
-        public async Task<ServiceResponse<int>> Register(User user, string password)
+        public async Task<ServiceResponse<int>> RegisterAsync(User user, string password)
         {
             ServiceResponse<int> response = new ServiceResponse<int>();
-            if (await UserExist(user.Email))
+            if (await UserExistAsync(user.Email))
             {
                 response.Success = false;
                 response.Message = "User is already registered";
@@ -65,7 +65,7 @@ namespace DreamSoccer.Repository.Implementations
             return response;
         }
 
-        public async Task<bool> UserExist(string email)
+        public async Task<bool> UserExistAsync(string email)
         {
             if (await _context.Users.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
             {

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Services", "Dre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Repository", "DreamSoccer.Repository\DreamSoccer.Repository.csproj", "{FEC1D9AE-A437-421F-9D18-7B59614E2454}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Services.Tests", "DreamSoccer.Services.Tests\DreamSoccer.Services.Tests.csproj", "{602EC181-7E46-46EE-A0C6-871B287609D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEC1D9AE-A437-421F-9D18-7B59614E2454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{602EC181-7E46-46EE-A0C6-871B287609D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{602EC181-7E46-46EE-A0C6-871B287609D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{602EC181-7E46-46EE-A0C6-871B287609D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{602EC181-7E46-46EE-A0C6-871B287609D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

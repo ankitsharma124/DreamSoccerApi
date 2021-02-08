@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DreamSoccer.Core.Contracts.Repositories;
+using DreamSoccer.Core.Contracts.Services;
 using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Core.Responses;
@@ -14,11 +15,11 @@ namespace DreamSoccerApi_Test
     public class AuthControllerTest
     {
         AuthController controller;
-        Mock<IAuthRepository> authRepository;
+        Mock<IUserService> userService;
         public AuthControllerTest()
         {
-            authRepository = new Mock<IAuthRepository>();
-            controller = new AuthController(authRepository.Object);
+            userService = new Mock<IUserService>();
+            controller = new AuthController(userService.Object);
         }
         #region Register
         [Fact]
@@ -38,8 +39,8 @@ namespace DreamSoccerApi_Test
         }
 
         [Theory]
-        [InlineData("test1@email.com", Role.Admin, "")]
-        public async Task Register_When_Data_Not_Valid(string email, Role role, string password)
+        [InlineData("test1@email.com", RoleEnum.Admin, "")]
+        public async Task Register_When_Data_Not_Valid(string email, RoleEnum role, string password)
         {
             // Arrange
             var userRegistration = new UserRegisterDto();
@@ -52,21 +53,21 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
-            authRepository.Verify(mock => mock.Register(It.IsAny<User>(), It.IsAny<string>()), Times.Never());
+            userService.Verify(mock => mock.RegisterAsync(It.IsAny<UserDto>(), It.IsAny<string>()), Times.Never());
         }
 
         [Theory]
-        [InlineData("test1@email.com", Role.Admin, "admin123")]
-        public async Task Register_When_Data_Valid(string email, Role role, string password)
+        [InlineData("test1@email.com", RoleEnum.Admin, "admin123")]
+        public async Task Register_When_Data_Valid(string email, RoleEnum role, string password)
         {
             // Arrange
             var userRegistration = new UserRegisterDto();
             userRegistration.Email = email;
             userRegistration.Role = role;
             userRegistration.Password = password;
-            authRepository.Setup(m =>
-                    m.Register(
-                 It.IsAny<User>(),
+            userService.Setup(m =>
+                    m.RegisterAsync(
+                 It.IsAny<UserDto>(),
               It.IsAny<string>()
           )).Returns(Task.FromResult(new ServiceResponse<int>() { Success = true }));
             // Actual
@@ -75,21 +76,21 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.Equal(typeof(OkObjectResult), actual.GetType());
-            authRepository.Verify(mock => mock.Register(It.IsAny<User>(), It.IsAny<string>()), Times.Once());
+            userService.Verify(mock => mock.RegisterAsync(It.IsAny<UserDto>(), It.IsAny<string>()), Times.Once());
         }
 
         [Theory]
-        [InlineData("test1@email.com", Role.Admin, "admin123")]
-        public async Task Register_When_Data_UnHandleException(string email, Role role, string password)
+        [InlineData("test1@email.com", RoleEnum.Admin, "admin123")]
+        public async Task Register_When_Data_UnHandleException(string email, RoleEnum role, string password)
         {
             // Arrange
             var userRegistration = new UserRegisterDto();
             userRegistration.Email = email;
             userRegistration.Role = role;
             userRegistration.Password = password;
-            authRepository.Setup(m =>
-           m.Register(
-                It.IsAny<User>(),
+            userService.Setup(m =>
+           m.RegisterAsync(
+                It.IsAny<UserDto>(),
                 It.IsAny<string>()
             )).Returns(Task.FromResult(new ServiceResponse<int>() { Success = false }));
 
@@ -99,7 +100,7 @@ namespace DreamSoccerApi_Test
             // Assert
 
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
-            authRepository.Verify(mock => mock.Register(It.IsAny<User>(), It.IsAny<string>()), Times.Once());
+            userService.Verify(mock => mock.RegisterAsync(It.IsAny<UserDto>(), It.IsAny<string>()), Times.Once());
         }
         #endregion
 
@@ -122,8 +123,8 @@ namespace DreamSoccerApi_Test
         }
 
         [Theory]
-        [InlineData("test1@email.com", Role.Admin, "")]
-        public async Task Login_When_Data_Not_Valid(string email, Role role, string password)
+        [InlineData("test1@email.com", RoleEnum.Admin, "")]
+        public async Task Login_When_Data_Not_Valid(string email, RoleEnum role, string password)
         {
             // Arrange
             var userRegistration = new UserRegisterDto();
@@ -136,7 +137,7 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
-            authRepository.Verify(mock => mock.Register(It.IsAny<User>(), It.IsAny<string>()), Times.Never());
+            userService.Verify(mock => mock.RegisterAsync(It.IsAny<UserDto>(), It.IsAny<string>()), Times.Never());
         }
 
         [Theory]
@@ -147,8 +148,8 @@ namespace DreamSoccerApi_Test
             var userLogin = new UserLoginDto();
             userLogin.Email = email;
             userLogin.Password = password;
-            authRepository.Setup(m =>
-                    m.Login(
+            userService.Setup(m =>
+                    m.LoginAsync(
                  It.IsAny<string>(),
               It.IsAny<string>()
           )).Returns(Task.FromResult(new ServiceResponse<string>() { Success = true }));
@@ -158,7 +159,7 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.Equal(typeof(OkObjectResult), actual.GetType());
-            authRepository.Verify(mock => mock.Login(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+            userService.Verify(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
         }
 
         [Theory]
@@ -169,8 +170,8 @@ namespace DreamSoccerApi_Test
             var userLogin = new UserLoginDto();
             userLogin.Email = email;
             userLogin.Password = password;
-            authRepository.Setup(m =>
-           m.Login(
+            userService.Setup(m =>
+           m.LoginAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>()
             )).Returns(Task.FromResult(new ServiceResponse<string>() { Success = false }));
@@ -179,7 +180,7 @@ namespace DreamSoccerApi_Test
             var actual = await controller.Login(userLogin);
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
-            authRepository.Verify(mock => mock.Login(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+            userService.Verify(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
         }
 
         #endregion

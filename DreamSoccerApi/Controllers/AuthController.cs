@@ -4,6 +4,7 @@ using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Core.Responses;
+using DreamSoccer.Core.Contracts.Services;
 
 namespace DreamSoccerApi.Controllers
 {
@@ -11,11 +12,11 @@ namespace DreamSoccerApi.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthRepository _authRepo;
+        private readonly IUserService _userService;
 
-        public AuthController(IAuthRepository authRepo)
+        public AuthController(IUserService userService)
         {
-            _authRepo = authRepo;
+            _userService = userService;
         }
         #region Signup
         [HttpPost("register")]
@@ -26,8 +27,8 @@ namespace DreamSoccerApi.Controllers
             {
                 return BadRequest(response);
             }
-            response = await _authRepo.Register(
-                new User { Email = _newUser.Email, Role = _newUser.Role }, _newUser.Password
+            response = await _userService.RegisterAsync(
+                new UserDto { Email = _newUser.Email, Role = _newUser.Role }, _newUser.Password
             );
             if (response.Success)
             {
@@ -44,7 +45,7 @@ namespace DreamSoccerApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto _newUser)
         {
-            ServiceResponse<string> response = await _authRepo.Login(
+            ServiceResponse<string> response = await _userService.LoginAsync(
                 _newUser.Email, _newUser.Password
             );
             if (response.Success)

@@ -3,15 +3,17 @@ using System;
 using DreamSoccer.Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DreamSoccer.Repository.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210208130938_CreateTeamPlayerEntity")]
+    partial class CreateTeamPlayerEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,9 +48,6 @@ namespace DreamSoccer.Repository.Migrations
 
                     b.Property<string>("LastName")
                         .HasColumnType("text");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("integer");
 
                     b.Property<int>("TeamId")
                         .HasColumnType("integer");
@@ -133,9 +132,6 @@ namespace DreamSoccer.Repository.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("TeamId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -143,9 +139,6 @@ namespace DreamSoccer.Repository.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TeamId")
-                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -161,20 +154,8 @@ namespace DreamSoccer.Repository.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("DreamSoccer.Core.Entities.User", b =>
-                {
-                    b.HasOne("DreamSoccer.Core.Entities.Team", "Team")
-                        .WithOne("Owner")
-                        .HasForeignKey("DreamSoccer.Core.Entities.User", "TeamId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Team");
-                });
-
             modelBuilder.Entity("DreamSoccer.Core.Entities.Team", b =>
                 {
-                    b.Navigation("Owner");
-
                     b.Navigation("Players");
                 });
 #pragma warning restore 612, 618

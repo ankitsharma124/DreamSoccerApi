@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DreamSoccer.Core.Configurations;
 using DreamSoccer.Core.Contracts.Repositories;
+using DreamSoccer.Core.Contracts.Services;
 using DreamSoccer.Repository.Context;
 using DreamSoccer.Repository.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +40,11 @@ namespace DreamSoccerApi
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IPlayerRepository, PlayerRepository>();
+            services.AddScoped<ITeamRepository, TeamRepository>();
+            services.AddScoped<IRandomRepository, RandomRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUserService, UserService>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -48,6 +55,10 @@ namespace DreamSoccerApi
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+            });
+            services.AddAutoMapper(n =>
+            {
+                n.AddProfile(new AutoMapperConfiguration());
             });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSwaggerGen(c =>
