@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DreamSoccerApi.Data;
-using DreamSoccerApi.Dtos.User;
 using DreamSoccerApi.Models;
 using DreamSoccerApi;
+using DreamSoccerApi.Dtos.User;
 
-namespace Toptal.Controllers
+namespace DreamSoccerApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -17,13 +17,14 @@ namespace Toptal.Controllers
         {
             _authRepo = authRepo;   
         }
+        #region Signup
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegisterDto _newUser)
         {
             ServiceResponse<int> response = new ServiceResponse<int>();
             if (!ModelState.IsValid)
             {
-                return BadRequest(response);;
+                return BadRequest(response);
             }
             response = await _authRepo.Register(
                 new User { Email = _newUser.Email, Role = _newUser.Role}, _newUser.Password
@@ -37,7 +38,9 @@ namespace Toptal.Controllers
                 return BadRequest(response);
             }
         }
+        #endregion
 
+        #region Login
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto _newUser)
         {
@@ -53,6 +56,6 @@ namespace Toptal.Controllers
                 return BadRequest(response);
             }
         }
-        
+        #endregion
     }
 }
