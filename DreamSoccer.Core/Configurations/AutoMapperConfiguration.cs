@@ -38,6 +38,9 @@ namespace DreamSoccer.Core.Configurations
 
             CreateMap<SearchTeamRequest, SearchTeamFilter>().ReverseMap();
 
+            CreateMap<PlayerReqeust, PlayerDto>().ReverseMap();
+            CreateMap<TeamReqeust, TeamDto>().ReverseMap();
+
         }
     }
 }

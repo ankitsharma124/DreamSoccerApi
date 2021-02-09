@@ -11,15 +11,19 @@ namespace DreamSoccer.Repository.Implementations
         where TEntity : BaseEntity
     {
         private readonly DataContext _context;
+        private readonly ICurrentUserRepository _currentUserRepository;
 
-        public BaseRepository(DataContext context)
+        public BaseRepository(DataContext context,
+            ICurrentUserRepository currentUserRepository)
         {
             _context = context;
+            _currentUserRepository = currentUserRepository;
         }
-        public virtual async Task CreateAsync(TEntity model)
+        public virtual async Task<TEntity> CreateAsync(TEntity model)
         {
             model.CreatedAt = DateTime.Now;
             await _context.Set<TEntity>().AddAsync(model);
+            return model;
 
         }
 
@@ -27,6 +31,7 @@ namespace DreamSoccer.Repository.Implementations
         {
             var model = await GetByIdAsync(id);
             model.DelFlag = true;
+            
             _context.Set<TEntity>().Update(model);
         }
 
@@ -40,10 +45,13 @@ namespace DreamSoccer.Repository.Implementations
             return (await _context.FindAsync<TEntity>(id));
         }
 
-        public virtual Task UpdateAsync(TKey id, TEntity model)
+        public virtual async Task<TEntity> UpdateAsync(TKey id, TEntity model)
         {
             model.UpdateAt = DateTime.Now;
-            return Task.FromResult(_context.Set<TEntity>().Update(model));
+            model.UpdatedBy = _currentUserRepository.Email;
+            _context.Set<TEntity>().Update(model);
+            model = await GetByIdAsync(id);
+            return model;
         }
     }
 }

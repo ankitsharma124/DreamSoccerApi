@@ -15,5 +15,11 @@ namespace DreamSoccer.Core.Contracts.Services
         Task<IEnumerable<TeamInformationDto>> GetAllTeams(SearchTeamFilter input);
 
         Task<bool> AddPlayerToMarketAsync(string owner, int playerId, long price);
+
+        Task<TeamDto> UpdateTeamAsync(TeamDto team);
+
+        Task<PlayerDto> UpdatePlayerAsync(PlayerDto player);
+
+        Task<PlayerDto> DeletePlayerAsync(PlayerDto player);
     }
 }

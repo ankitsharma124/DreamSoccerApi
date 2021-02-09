@@ -11,13 +11,14 @@ namespace DreamSoccer.Repository.Implementations
 {
     public class TeamRepository : BaseRepository<int, Team>, ITeamRepository
     {
-        public TeamRepository(DataContext context) : base(context)
+        public TeamRepository(DataContext context, ICurrentUserRepository currentUserRepository) : base(context, currentUserRepository)
         {
         }
         public override async Task<Team> GetByIdAsync(int id)
         {
             var query = await GetAllAsync();
             return query.Include(n => n.Players)
+                .Include(n=>n.Owner)
                .FirstOrDefault(n => n.Id == id);
         }
 

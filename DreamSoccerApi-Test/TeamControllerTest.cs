@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
+using DreamSoccer.Core.Dtos.Players;
 using DreamSoccer.Core.Dtos.Teams;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Dtos.User;
@@ -126,7 +127,6 @@ namespace DreamSoccerApi_Test
 
         #endregion
 
-
         #region AddPlayerToMarket
         [Fact]
         public void AddPlayerToMarket_When_Access_By_Team_Owner()
@@ -147,13 +147,13 @@ namespace DreamSoccerApi_Test
 
         [Theory]
         [InlineData(2, 1, 2500000)]
-        public async Task AddPlayerToMarket_When_Successt(int userId, int palyerId, long price)
+        public async Task AddPlayerToMarket_When_Successt(int userId, int playerId, long price)
         {
             // Arrange
             var request = new AddTransferListRequest()
             {
                 Price = price,
-                PlayerId = palyerId
+                PlayerId = playerId
             };
             httpContextAccessor.CreateUserLogin(userId);
             teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(true));
@@ -169,13 +169,13 @@ namespace DreamSoccerApi_Test
 
         [Theory]
         [InlineData(2, 1, 2500000)]
-        public async Task AddPlayerToMarket_When_Failed(int userId, int palyerId, long price)
+        public async Task AddPlayerToMarket_When_Failed(int userId, int playerId, long price)
         {
             // Arrange
             var request = new AddTransferListRequest()
             {
                 Price = price,
-                PlayerId = palyerId
+                PlayerId = playerId
             };
             httpContextAccessor.CreateUserLogin(userId);
             teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(false));
@@ -191,13 +191,13 @@ namespace DreamSoccerApi_Test
 
         [Theory]
         [InlineData(2, 1, 2500000)]
-        public async Task AddPlayerToMarket_When_UnhandleException(int userId, int palyerId, long price)
+        public async Task AddPlayerToMarket_When_UnhandleException(int userId, int playerId, long price)
         {
             // Arrange
             var request = new AddTransferListRequest()
             {
                 Price = price,
-                PlayerId = palyerId
+                PlayerId = playerId
             };
             httpContextAccessor.CreateUserLogin(userId);
             teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Throws(new ArgumentException("Connection Timeout"));
@@ -213,7 +213,6 @@ namespace DreamSoccerApi_Test
 
 
         #endregion
-
 
         #region GetAllPlayers
         [Fact]
@@ -317,7 +316,6 @@ namespace DreamSoccerApi_Test
 
         #endregion
 
-
         #region GetAllTeams
         [Fact]
         public void GetAllTeams_When_Access_By_Admin()
@@ -420,6 +418,316 @@ namespace DreamSoccerApi_Test
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
             teamService.Verify(mock => mock.GetAllTeams(It.IsAny<SearchTeamFilter>()), Times.Once());
         }
+
+        #endregion
+
+        #region UpdatePlayer
+        [Fact]
+        public void UpdatePlayer_When_Access_By_Team_Owner()
+        {
+            // Arrange
+            var nameMethod = nameof(controller.UpdatePlayerAsync);
+            var methodInformation = controller.GetType().GetMethod(nameMethod);
+
+            // Actual
+            var actualAttribute = methodInformation
+                .GetCustomAttributes(true)
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().ToArray();
+
+            // Assert
+            Assert.True(actualAttribute.Any());
+            Assert.Equal("Team_Owner,Admin", actualAttribute[0].Roles);
+        }
+
+        [Theory]
+        [InlineData(2, 1, 2500000)]
+        public async Task UpdatePlayer_When_Successt(int userId, int playerId, long price)
+        {
+            // Arrange
+            var request = new PlayerReqeust()
+            {
+                Value = price,
+                Id = playerId
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var player = new PlayerDto()
+            {
+                Id = playerId,
+                Value = price
+            };
+            teamService.Setup(_ => _.UpdatePlayerAsync(It.IsAny<PlayerDto>())).Returns(Task.FromResult(player));
+            // Actual
+            // Actual
+            var actual = await controller.UpdatePlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.UpdatePlayerAsync(It.IsAny<PlayerDto>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 1, 2500000)]
+        public async Task UpdatePlayer_When_Failed(int userId, int playerId, long price)
+        {
+            // Arrange
+            // Arrange
+            var request = new PlayerReqeust()
+            {
+                Value = price,
+                Id = playerId
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var player = new PlayerDto()
+            {
+                Id = playerId,
+                Value = price
+            };
+            teamService.Setup(_ => _.UpdatePlayerAsync(It.IsAny<PlayerDto>())).Returns(Task.FromResult<PlayerDto>(null));
+            // Actual
+            // Actual
+            var actual = await controller.UpdatePlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.UpdatePlayerAsync(It.IsAny<PlayerDto>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 1, 2500000)]
+        public async Task UpdatePlayer_When_UnhandleException(int userId, int playerId, long price)
+        {
+            // Arrange
+            var request = new PlayerReqeust()
+            {
+                Value = price,
+                Id = playerId
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var player = new PlayerDto()
+            {
+                Id = playerId,
+                Value = price
+            };
+            teamService.Setup(_ => _.UpdatePlayerAsync(It.IsAny<PlayerDto>())).Throws(new ArgumentException("Connection Timeout"));
+            // Actual
+            // Actual
+            var actual = await controller.UpdatePlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.UpdatePlayerAsync(It.IsAny<PlayerDto>()), Times.Once());
+        }
+
+
+        #endregion
+
+        #region DeletePlayer
+        [Fact]
+        public void DeletePlayer_When_Access_By_Team_Owner()
+        {
+            // Arrange
+            var nameMethod = nameof(controller.DeletePlayerAsync);
+            var methodInformation = controller.GetType().GetMethod(nameMethod);
+
+            // Actual
+            var actualAttribute = methodInformation
+                .GetCustomAttributes(true)
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().ToArray();
+
+            // Assert
+            Assert.True(actualAttribute.Any());
+            Assert.Equal("Team_Owner,Admin", actualAttribute[0].Roles);
+        }
+
+        [Theory]
+        [InlineData(2, 1, 2500000)]
+        public async Task DeletePlayer_When_Successt(int userId, int playerId, long price)
+        {
+            // Arrange
+            var request = new PlayerReqeust()
+            {
+                Value = price,
+                Id = playerId
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var player = new PlayerDto()
+            {
+                Id = playerId,
+                Value = price
+            };
+            teamService.Setup(_ => _.DeletePlayerAsync(It.IsAny<PlayerDto>())).Returns(Task.FromResult(player));
+            // Actual
+            // Actual
+            var actual = await controller.DeletePlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.DeletePlayerAsync(It.IsAny<PlayerDto>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 1, 2500000)]
+        public async Task DeletePlayer_When_Failed(int userId, int playerId, long price)
+        {
+            // Arrange
+            // Arrange
+            var request = new PlayerReqeust()
+            {
+                Value = price,
+                Id = playerId
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var player = new PlayerDto()
+            {
+                Id = playerId,
+                Value = price
+            };
+            teamService.Setup(_ => _.DeletePlayerAsync(It.IsAny<PlayerDto>())).Returns(Task.FromResult<PlayerDto>(null));
+            // Actual
+            // Actual
+            var actual = await controller.DeletePlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.DeletePlayerAsync(It.IsAny<PlayerDto>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 1, 2500000)]
+        public async Task DeletePlayer_When_UnhandleException(int userId, int playerId, long price)
+        {
+            // Arrange
+            var request = new PlayerReqeust()
+            {
+                Value = price,
+                Id = playerId
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var player = new PlayerDto()
+            {
+                Id = playerId,
+                Value = price
+            };
+            teamService.Setup(_ => _.DeletePlayerAsync(It.IsAny<PlayerDto>())).Throws(new ArgumentException("Connection Timeout"));
+            // Actual
+            // Actual
+            var actual = await controller.DeletePlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.DeletePlayerAsync(It.IsAny<PlayerDto>()), Times.Once());
+        }
+
+
+        #endregion
+
+        #region UpdateTeam
+        [Fact]
+        public void UpdateTeam_When_Access_By_Team_Owner()
+        {
+            // Arrange
+            var nameMethod = nameof(controller.UpdateTeamAsync);
+            var methodInformation = controller.GetType().GetMethod(nameMethod);
+
+            // Actual
+            var actualAttribute = methodInformation
+                .GetCustomAttributes(true)
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().ToArray();
+
+            // Assert
+            Assert.True(actualAttribute.Any());
+            Assert.Equal("Team_Owner,Admin", actualAttribute[0].Roles);
+        }
+
+        [Theory]
+        [InlineData(2, 1, 50000000, "Team1", "US")]
+        public async Task UpdateTeam_When_Successt(int userId, int teamId, long budget, string teamName, string country)
+        {
+            // Arrange
+            var request = new TeamReqeust()
+            {
+
+                Id = teamId,
+                Budget = budget,
+                TeamName = teamName,
+                Country = country
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+            var team = new TeamDto()
+            {
+                Id = teamId,
+                Budget = budget
+            };
+            teamService.Setup(_ => _.UpdateTeamAsync(It.IsAny<TeamDto>())).Returns(Task.FromResult(team));
+            // Actual
+            // Actual
+            var actual = await controller.UpdateTeamAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.UpdateTeamAsync(It.IsAny<TeamDto>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 1, 50000000, "Team1", "US")]
+        public async Task UpdateTeam_When_Failed(int userId, int teamId, long budget, string teamName, string country)
+        {
+            // Arrange
+            var request = new TeamReqeust()
+            {
+
+                Id = teamId,
+                Budget = budget,
+                TeamName = teamName,
+                Country = country
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+           
+            teamService.Setup(_ => _.UpdateTeamAsync(It.IsAny<TeamDto>())).Returns(Task.FromResult<TeamDto>(null));
+            // Actual
+            // Actual
+            var actual = await controller.UpdateTeamAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.UpdateTeamAsync(It.IsAny<TeamDto>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 1, 50000000, "Team1", "US")]
+        public async Task UpdateTeam_When_UnHandleException(int userId, int teamId, long budget, string teamName, string country)
+        {
+            // Arrange
+            var request = new TeamReqeust()
+            {
+
+                Id = teamId,
+                Budget = budget,
+                TeamName = teamName,
+                Country = country
+            };
+            httpContextAccessor.CreateUserLogin(userId);
+
+            teamService.Setup(_ => _.UpdateTeamAsync(It.IsAny<TeamDto>())).Throws(new ArgumentException("Connection Time out"));
+            // Actual
+            // Actual
+            var actual = await controller.UpdateTeamAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            httpContextAccessor.Verify(mock => mock.HttpContext, Times.Exactly(1));
+            teamService.Verify(mock => mock.UpdateTeamAsync(It.IsAny<TeamDto>()), Times.Once());
+        }
+
+
 
         #endregion
     }

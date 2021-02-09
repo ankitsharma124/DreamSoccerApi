@@ -11,7 +11,7 @@ namespace DreamSoccer.Repository.Implementations
 {
     public class PlayerRepository : BaseRepository<int, Player>, IPlayerRepository
     {
-        public PlayerRepository(DataContext context) : base(context)
+        public PlayerRepository(DataContext context, ICurrentUserRepository currentUserRepository) : base(context, currentUserRepository)
         {
         }
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
+using DreamSoccer.Core.Dtos.Players;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Services.Test.Helpers;
@@ -20,6 +21,7 @@ namespace DreamSoccerApi_Test
         Mock<IPlayerRepository> playerRepository;
         Mock<ITransferListRepository> transferListRepository;
         Mock<ITeamRepository> teamRepository;
+        Mock<ICurrentUserRepository> currentUserRepository;
         Mock<IUnitOfWork> unitOfWork;
         public TeamServiceTest()
         {
@@ -28,9 +30,10 @@ namespace DreamSoccerApi_Test
             mapper = AutoMapperHelper.Create();
             playerRepository = new Mock<IPlayerRepository>();
             unitOfWork = new Mock<IUnitOfWork>();
+            currentUserRepository = new Mock<ICurrentUserRepository>();
             teamRepository = new Mock<ITeamRepository>();
             service = new TeamService(mapper, userRepository.Object, playerRepository.Object,
-                transferListRepository.Object, unitOfWork.Object, teamRepository.Object);
+                transferListRepository.Object, unitOfWork.Object, teamRepository.Object, currentUserRepository.Object);
         }
 
         #region GetMyTeam
@@ -270,7 +273,7 @@ namespace DreamSoccerApi_Test
             {
                 TeamName = teamName
             };
-            
+
             var players = new List<Player>();
             players.Add(new Player()
             {
@@ -303,5 +306,302 @@ namespace DreamSoccerApi_Test
 
         #endregion
 
+
+        #region UpdateTeamAsync
+
+        [Theory]
+        [InlineData(1, "Team 1", "US", 5000000, RoleEnum.Admin)]
+        [InlineData(1, "Team 2", "US", 5200000, RoleEnum.Team_Owner)]
+        [InlineData(1, "Team 2", "US", 5400000, RoleEnum.Team_Owner)]
+        public async Task UpdateTeam_When_Return_Data(int teamId, string teamName, string country, long budget, RoleEnum role)
+        {
+            // Arrange
+            int currentBudget = 5200000;
+            var input = new TeamDto
+            {
+                Id = teamId,
+                TeamName = teamName,
+                Country = country,
+                Budget = budget
+            };
+
+            currentUserRepository.Setup(n => n.Role).Returns(role);
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
+            {
+                Id = 1,
+                Role = role,
+                TeamId = teamId,
+                Team = new Team()
+                {
+                    Budget = currentBudget
+                }
+            }));
+            teamRepository.Setup(m =>
+                  m.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>())
+                );
+
+            // Actual
+            var actual = await service.UpdateTeamAsync(input);
+
+            // Assert
+
+            if (role == RoleEnum.Admin)
+            {
+                userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Never());
+                teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Once());
+                unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+            }
+            else
+            {
+                userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+                if (currentBudget != budget)
+                {
+                    Assert.Equal("You can't change budget", service.CurrentMessage);
+                    unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+                    Assert.Null(actual);
+                    teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());
+                }
+                else
+                {
+                    teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Once());
+                    unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+                }
+            }
+
+        }
+        [Theory]
+        [InlineData(1, "Team 1", "US", 5000000, RoleEnum.Team_Owner)]
+        public async Task UpdateTeam_When_Return_Not_Have_Access(int teamId, string teamName, string country, long budget, RoleEnum role)
+        {
+            // Arrange
+            var input = new TeamDto
+            {
+                Id = teamId,
+                TeamName = teamName,
+                Country = country,
+                Budget = budget
+            };
+
+            currentUserRepository.Setup(n => n.Role).Returns(role);
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
+            {
+                Id = 1,
+                Role = role,
+                TeamId = 2
+            }));
+            teamRepository.Setup(m =>
+                  m.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>())
+                );
+
+            // Actual
+            var actual = await service.UpdateTeamAsync(input);
+
+            // Assert
+            teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            Assert.Null(actual);
+            Assert.Equal("It's not your team", service.CurrentMessage);
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+
+        }
+
+
+        #endregion
+
+        #region UpdatePlayer
+
+        [Theory]
+        [InlineData(1, "Jhonatan", "Chirstian", 200000, RoleEnum.Admin)]
+        [InlineData(1, "Jhonatan", "Chirstian", 200000, RoleEnum.Team_Owner)]
+        [InlineData(1, "Team 2", "US", 5200000, RoleEnum.Team_Owner)]
+        public async Task UpdatePlayer_When_Return_Data(int playerId, string firstName, string lastName, long value, RoleEnum role)
+        {
+            // Arrange
+            int currentValue = 200000;
+            var input = new PlayerDto
+            {
+                Id = playerId,
+                FirstName = firstName,
+                LastName = lastName,
+                Value = value,
+                TeamId = 2
+
+            };
+            playerRepository.Setup(n => n.GetByIdAsync(It.IsAny<int>())).Returns(Task.FromResult(new Player()
+            {
+                Value = 200000
+            }));
+            currentUserRepository.Setup(n => n.Role).Returns(role);
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
+            {
+                Id = 1,
+                Role = role,
+                TeamId = 2
+            }));
+            playerRepository.Setup(m =>
+                  m.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>())
+                );
+
+            // Actual
+            var actual = await service.UpdatePlayerAsync(input);
+
+            // Assert
+            if (role == RoleEnum.Admin)
+            {
+                userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Never());
+                playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Once());
+                unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+            }
+            else
+            {
+                userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+                if (currentValue != value)
+                {
+                    Assert.Equal("You can't change value", service.CurrentMessage);
+                    Assert.Null(actual);
+                    playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
+                    playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
+                    unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+                }
+                else
+                {
+                    playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Once());
+                    unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+                }
+            }
+
+        }
+
+        [Theory]
+        [InlineData(1, "Team 2", "US", 5200000, RoleEnum.Team_Owner)]
+        public async Task UpdatePlayer_When_Not_Have_Access(int playerId, string firstName, string lastName, long value, RoleEnum role)
+        {
+            // Arrange
+            var input = new PlayerDto
+            {
+                Id = playerId,
+                FirstName = firstName,
+                LastName = lastName,
+                Value = value,
+                TeamId = 2
+
+            };
+
+            currentUserRepository.Setup(n => n.Role).Returns(role);
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
+            {
+                Id = 1,
+                Role = role,
+                TeamId = 1
+            }));
+            playerRepository.Setup(m =>
+                  m.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>())
+                );
+
+            // Actual
+            var actual = await service.UpdatePlayerAsync(input);
+
+            // Assert
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            Assert.Null(actual);
+            Assert.Equal("Player not in your team", service.CurrentMessage);
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+        }
+
+
+        #endregion
+
+        #region DeletePlayer
+
+        [Theory]
+        [InlineData(1, "Jhonatan", "Chirstian", 200000, RoleEnum.Admin)]
+        [InlineData(1, "Jhonatan", "Chirstian", 200000, RoleEnum.Team_Owner)]
+        [InlineData(1, "Team 2", "US", 5200000, RoleEnum.Team_Owner)]
+        public async Task DeletePlayer_When_Success(int playerId, string firstName, string lastName, long value, RoleEnum role)
+        {
+            // Arrange
+            
+            var input = new PlayerDto
+            {
+                Id = playerId,
+                FirstName = firstName,
+                LastName = lastName,
+                Value = value,
+                TeamId = 2
+
+            };
+            playerRepository.Setup(n => n.DeleteAsync(It.IsAny<int>())).Returns(Task.FromResult(new Player()
+            {
+                Value = 200000
+            }));
+            currentUserRepository.Setup(n => n.Role).Returns(role);
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
+            {
+                Id = 1,
+                Role = role,
+                TeamId = 2
+            }));
+            playerRepository.Setup(m =>
+                  m.DeleteAsync(It.IsAny<int>())
+                );
+
+            // Actual
+            var actual = await service.DeletePlayerAsync(input);
+
+            // Assert
+            if (role == RoleEnum.Admin)
+            {
+                userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Never());
+                playerRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Once());
+            }
+            else
+            {
+                userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+                playerRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Once());
+            }
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+
+        }
+
+        [Theory]
+        [InlineData(1, "Team 2", "US", 5200000, RoleEnum.Team_Owner)]
+        public async Task DeletePlayer_When_Not_Have_Access(int playerId, string firstName, string lastName, long value, RoleEnum role)
+        {
+            // Arrange
+            var input = new PlayerDto
+            {
+                Id = playerId,
+                FirstName = firstName,
+                LastName = lastName,
+                Value = value,
+                TeamId = 2
+
+            };
+
+            currentUserRepository.Setup(n => n.Role).Returns(role);
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
+            {
+                Id = 1,
+                Role = role,
+                TeamId = 1
+            }));
+            playerRepository.Setup(m =>
+                  m.DeleteAsync(It.IsAny<int>())
+                );
+
+            // Actual
+            var actual = await service.DeletePlayerAsync(input);
+
+            // Assert
+            playerRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            Assert.Null(actual);
+            Assert.Equal("Player not in your team", service.CurrentMessage);
+        }
+
+
+        #endregion
     }
 }

@@ -18,13 +18,15 @@ namespace DreamSoccer.Core.Contracts.Services
         private readonly ITransferListRepository _transferListRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITeamRepository _teamRepository;
+        private readonly ICurrentUserRepository _currentUserRepository;
 
         public TeamService(IMapper mapper,
             IUserRepository userRepository,
             IPlayerRepository playerRepository,
             ITransferListRepository transferListRepository,
             IUnitOfWork unitOfWork,
-            ITeamRepository teamRepository)
+            ITeamRepository teamRepository,
+            ICurrentUserRepository currentUserRepository)
         {
             _mapper = mapper;
             _userRepository = userRepository;
@@ -32,6 +34,7 @@ namespace DreamSoccer.Core.Contracts.Services
             _transferListRepository = transferListRepository;
             _unitOfWork = unitOfWork;
             _teamRepository = teamRepository;
+            _currentUserRepository = currentUserRepository;
         }
 
         public async Task<TeamInformationDto> GetMyTeamAsync(string email)
@@ -83,6 +86,66 @@ namespace DreamSoccer.Core.Contracts.Services
         {
             var teams = await _teamRepository.SearchTeams(input);
             return _mapper.Map<IEnumerable<TeamInformationDto>>(teams);
+        }
+
+        public async Task<TeamDto> UpdateTeamAsync(TeamDto team)
+        {
+            if (_currentUserRepository.Role == RoleEnum.Team_Owner)
+            {
+                var user = await _userRepository.GetByEmailAsync(_currentUserRepository.Email);
+                if (team.Id != user.TeamId)
+                {
+                    CurrentMessage = "It's not your team";
+                    return null;
+                }
+                if (user.Team.Budget != team.Budget)
+                {
+                    CurrentMessage = "You can't change budget";
+                    return null;
+                }
+            }
+            var currentTeam = _mapper.Map<Team>(team);
+            await _teamRepository.UpdateAsync(team.Id, currentTeam);
+            await _unitOfWork.SaveChangesAsync();
+            return _mapper.Map<TeamDto>(currentTeam);
+        }
+
+        public async Task<PlayerDto> UpdatePlayerAsync(PlayerDto player)
+        {
+            if (_currentUserRepository.Role == RoleEnum.Team_Owner)
+            {
+                var user = await _userRepository.GetByEmailAsync(_currentUserRepository.Email);
+                if (player.TeamId != user.TeamId)
+                {
+                    CurrentMessage = "Player not in your team";
+                    return null;
+                }
+                var currentPlayer = await _playerRepository.GetByIdAsync(player.Id);
+                if (currentPlayer.Value != player.Value)
+                {
+                    CurrentMessage = "You can't change value";
+                    return null;
+                }
+            }
+            player = _mapper.Map<PlayerDto>(await _playerRepository.UpdateAsync(player.Id, _mapper.Map<Player>(player)));
+            await _unitOfWork.SaveChangesAsync();
+            return player;
+        }
+
+        public async Task<PlayerDto> DeletePlayerAsync(PlayerDto player)
+        {
+            if (_currentUserRepository.Role == RoleEnum.Team_Owner)
+            {
+                var user = await _userRepository.GetByEmailAsync(_currentUserRepository.Email);
+                if (player.TeamId != user.TeamId)
+                {
+                    CurrentMessage = "Player not in your team";
+                    return null;
+                }
+            }
+            await _playerRepository.DeleteAsync(player.Id);
+            await _unitOfWork.SaveChangesAsync();
+            return player;
         }
     }
 }

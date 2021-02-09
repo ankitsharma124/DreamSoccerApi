@@ -8,6 +8,7 @@ using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
 using DreamSoccer.Repository.Context;
 using DreamSoccer.Repository.Implementations;
+using DreamSoccerApi.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,11 +46,11 @@ namespace DreamSoccerApi
             services.AddScoped<ITransferListRepository, TransferListRepository>();
             services.AddScoped<IRandomRepository, RandomRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-            
+            services.AddScoped<ICurrentUserRepository, CurrentUserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITeamService, TeamService>();
-            services.AddScoped<ITransferListService, TransferListService>(); 
+            services.AddScoped<ITransferListService, TransferListService>();
 
 
 

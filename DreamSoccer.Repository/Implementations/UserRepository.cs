@@ -9,7 +9,7 @@ namespace DreamSoccer.Repository.Implementations
 {
     public class UserRepository : BaseRepository<int, User>, IUserRepository
     {
-        public UserRepository(DataContext context) : base(context)
+        public UserRepository(DataContext context,ICurrentUserRepository currentUserRepository) : base(context,currentUserRepository)
         {
         }
 

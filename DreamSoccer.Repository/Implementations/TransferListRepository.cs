@@ -11,7 +11,7 @@ namespace DreamSoccer.Repository.Implementations
 {
     public class TransferListRepository : BaseRepository<int, TransferList>, ITransferListRepository
     {
-        public TransferListRepository(DataContext context) : base(context)
+        public TransferListRepository(DataContext context, ICurrentUserRepository currentUserRepository) : base(context, currentUserRepository)
         {
         }
 
