@@ -7,13 +7,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccerApi", "DreamSocc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccerApi-Test", "DreamSoccerApi-Test\DreamSoccerApi-Test.csproj", "{8315A5C2-B5B1-467D-BA38-FF912A879B3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Core", "DreamSoccer.Core\DreamSoccer.Core.csproj", "{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccer.Core", "DreamSoccer.Core\DreamSoccer.Core.csproj", "{FD061B06-FE26-4136-AAFA-1089FDFA0C3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Services", "DreamSoccer.Services\DreamSoccer.Services.csproj", "{C6555361-098F-4863-A4F0-1B87EB8181E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccer.Services", "DreamSoccer.Services\DreamSoccer.Services.csproj", "{C6555361-098F-4863-A4F0-1B87EB8181E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Repository", "DreamSoccer.Repository\DreamSoccer.Repository.csproj", "{FEC1D9AE-A437-421F-9D18-7B59614E2454}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccer.Repository", "DreamSoccer.Repository\DreamSoccer.Repository.csproj", "{FEC1D9AE-A437-421F-9D18-7B59614E2454}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccer.Services.Tests", "DreamSoccer.Services.Tests\DreamSoccer.Services.Tests.csproj", "{602EC181-7E46-46EE-A0C6-871B287609D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamSoccer.Services.Tests", "DreamSoccer.Services.Tests\DreamSoccer.Services.Tests.csproj", "{602EC181-7E46-46EE-A0C6-871B287609D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamSoccerApi.EndToEnd", "DreamSoccerApi.EndToEnd\DreamSoccerApi.EndToEnd.csproj", "{F650E735-60A0-44C2-A74E-172BB828F08E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{602EC181-7E46-46EE-A0C6-871B287609D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{602EC181-7E46-46EE-A0C6-871B287609D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{602EC181-7E46-46EE-A0C6-871B287609D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F650E735-60A0-44C2-A74E-172BB828F08E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F650E735-60A0-44C2-A74E-172BB828F08E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F650E735-60A0-44C2-A74E-172BB828F08E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F650E735-60A0-44C2-A74E-172BB828F08E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

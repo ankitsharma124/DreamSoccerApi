@@ -1,38 +1,18 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Core.Responses;
 using DreamSoccer.Core.Contracts.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 using System.Linq;
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace DreamSoccerApi.Controllers
 {
-    public class SoccerControllerBase : ControllerBase
-    {
-        protected readonly IHttpContextAccessor _httpContextAccessor;
-
-        public SoccerControllerBase(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-        public string CurrentEmail
-        {
-            get
-            {
-                return _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(n => n.Type == ClaimTypes.Name).Value;
-            }
-        }
-    }
     [ApiController]
     [Route("[controller]")]
     public class TeamController : SoccerControllerBase
@@ -44,7 +24,12 @@ namespace DreamSoccerApi.Controllers
         {
             _teamService = teamService;
         }
-
+        [HttpGet("TestIndex")]
+        [Authorize(Roles = "Team_Owner")]
+        public IActionResult GetIndex()
+        {
+            return Ok();
+        }
         #region GetMyPlayers
 
         [HttpGet("GetMyPlayers")]

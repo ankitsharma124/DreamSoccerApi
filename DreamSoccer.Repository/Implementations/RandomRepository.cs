@@ -3,7 +3,7 @@ using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Entities;
 using System.Threading.Tasks;
 
-namespace DreamSoccer.Repository.Context
+namespace DreamSoccer.Repository.Implementations
 {
     public class RandomRepository : IRandomRepository
     {

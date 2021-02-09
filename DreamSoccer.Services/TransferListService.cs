@@ -71,7 +71,7 @@ namespace DreamSoccer.Core.Contracts.Services
                 currentPlayer.Value = currentPlayer.Value + (valueIncrease * currentPlayer.Value / 100);
                 previosTeam.Budget = previosTeam.Budget + player.Value;
                 team.Budget = team.Budget - player.Value;
-                
+                currentPlayer.TeamId = team.Id;
                 await _playerRepository.UpdateAsync(currentPlayer.Id, currentPlayer);
                 await _teamRepository.UpdateAsync(teamId, team);
                 await _teamRepository.UpdateAsync(previosTeam.Id, previosTeam);
