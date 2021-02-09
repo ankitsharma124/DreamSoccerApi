@@ -9,5 +9,8 @@ namespace DreamSoccer.Core.Dtos.Players
         public string Country { get; set; }
         public long Budget { get; set; }
         public UserOwnerDto Owner { get; set; }
+
+        public long TeamValue { get; set; }
+
     }
 }

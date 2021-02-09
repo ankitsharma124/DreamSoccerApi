@@ -171,7 +171,7 @@ namespace DreamSoccerApi_Test
                 {
                     Id = 1,
                 },
-                Team = new Team()
+                NextTeam = new Team()
                 {
                     Id = 1,
                     TeamName = "Team Destination"

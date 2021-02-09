@@ -117,8 +117,49 @@ namespace DreamSoccerApi_Test
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+            transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Once());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Once());
             Assert.True(actual);
+        }
+
+        [Theory]
+        [InlineData("test1@email.com", 2, 25000000)]
+        public async Task AddPlayerToMarket_When_Player_Exists_In_Transfer_List(string owner, int playerId, long price)
+        {
+            // Arrange
+            var user = new User() { Email = "test1@email.com", TeamId = 2 };
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
+            var player = new Player()
+            {
+                FirstName = "Jhonatan",
+                Age = 20,
+                Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
+                Country = "UK",
+                Team = new Team()
+                {
+                    TeamName = "Team 1",
+                    Owner = user
+                }
+            };
+            playerRepository.Setup(m =>
+                  m.GetByIdAsync(It.IsAny<int>())
+                ).Returns(Task.FromResult(player));
+            transferListRepository.Setup(m =>
+               m.CheckPlayerExistAsync(It.IsAny<int>())
+             ).Returns(Task.FromResult(true));
+
+
+            // Actual
+            var actual = await service.AddPlayerToMarketAsync(owner, playerId, price);
+
+            // Assert
+            playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Once());
+            transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
+            Assert.False(actual);
+            Assert.Equal("Player Exist in transfer List", service.CurrentMessage);
         }
 
         [Theory]
@@ -153,6 +194,7 @@ namespace DreamSoccerApi_Test
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
+            transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Never());
             Assert.False(actual);
             Assert.Equal("Player not in our Team", service.CurrentMessage);
         }
@@ -173,6 +215,7 @@ namespace DreamSoccerApi_Test
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
+            transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Never());
             Assert.False(actual);
             Assert.Equal("User doesn't exist", service.CurrentMessage);
         }

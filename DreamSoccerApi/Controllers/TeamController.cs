@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 namespace DreamSoccerApi.Controllers
 {
@@ -92,6 +93,7 @@ namespace DreamSoccerApi.Controllers
                 else
                 {
                     response.Success = false;
+                    response.Message = _teamService.CurrentMessage;
                     return BadRequest(response);
                 }
             }

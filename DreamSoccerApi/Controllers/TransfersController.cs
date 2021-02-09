@@ -88,6 +88,7 @@ namespace DreamSoccerApi.Controllers
                 else
                 {
                     response.Success = false;
+                    response.Message = _transferListService.CurrentMessage;
                     return NotFound(response);
                 }
             }

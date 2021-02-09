@@ -52,7 +52,12 @@ namespace DreamSoccer.Core.Contracts.Services
             if (player != null)
                 if (player.Team.Owner.Email == user.Email)
                 {
-                    var model = new TransferList() { Player = player, Value = price };
+                    if (await _transferListRepository.CheckPlayerExistAsync(player.Id))
+                    {
+                        CurrentMessage = "Player Exist in transfer List";
+                        return false;
+                    }
+                    var model = new TransferList() { PlayerId = player.Id, Value = price };
                     await _transferListRepository.CreateAsync(model);
                     await _unitOfWork.SaveChangesAsync();
                     return true;

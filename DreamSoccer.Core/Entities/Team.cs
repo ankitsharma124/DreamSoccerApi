@@ -8,7 +8,7 @@ namespace DreamSoccer.Core.Entities
         public string TeamName { get; set; }
         public string Country { get; set; }
         public long Budget { get; set; }
-        public ICollection<Player> Players { get; set; } = new List<Player>();
+        public virtual ICollection<Player> Players { get; set; } = new List<Player>();
         public User Owner { get; set; }
     }
 }

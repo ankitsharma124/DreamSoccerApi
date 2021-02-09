@@ -60,20 +60,30 @@ namespace DreamSoccer.Core.Contracts.Services
             var team = await _teamRepository.GetByIdAsync(teamId);
             if (team.Budget >= player.Value)
             {
+                if(team.Id == player.Player.TeamId)
+                {
+                    CurrentMessage = "This player in your team";
+                    return null;
+                }
                 var currentPlayer = player.Player;
-                currentPlayer.TeamId = teamId;
+                var previosTeam = await _teamRepository.GetByIdAsync(currentPlayer.TeamId);
                 var valueIncrease = await _randomRepository.GetRandomRatioForIncreaseValue();
                 currentPlayer.Value = currentPlayer.Value + (valueIncrease * currentPlayer.Value / 100);
-                team.Budget -= player.Value;
+                previosTeam.Budget = previosTeam.Budget + player.Value;
+                team.Budget = team.Budget - player.Value;
+                
                 await _playerRepository.UpdateAsync(currentPlayer.Id, currentPlayer);
                 await _teamRepository.UpdateAsync(teamId, team);
+                await _teamRepository.UpdateAsync(previosTeam.Id, previosTeam);
                 await _transferListRepository.DeleteAsync(player.Id);
                 await _unitOfWork.SaveChangesAsync();
                 currentPlayer = await _playerRepository.GetByIdAsync(currentPlayer.Id);
                 return new BuyPlayerResult()
                 {
                     Player = currentPlayer,
-                    Team = team
+                    PreviousTeam = previosTeam,
+                    NextTeam = team,
+
                 };
             }
             else

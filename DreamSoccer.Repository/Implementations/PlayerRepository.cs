@@ -16,12 +16,16 @@ namespace DreamSoccer.Repository.Implementations
         public async Task<IQueryable<Player>> GetPlayerByTeamIdAsync(int teamId)
         {
             var query = await GetAllAsync();
-            return query.Include(n => n.Team).Where(n => n.TeamId == teamId);
+            return query.Include(n => n.Team)
+                .ThenInclude(n=>n.Players)
+                .Where(n => n.TeamId == teamId);
         }
         public override async Task<Player> GetByIdAsync(int id)
         {
             return (await GetAllAsync())
                 .Include(n=>n.Team)
+                .ThenInclude(n => n.Players)
+                .Include(n => n.Team)
                 .ThenInclude(n=>n.Owner)
                 .FirstOrDefault(n => n.Id == id);
         }

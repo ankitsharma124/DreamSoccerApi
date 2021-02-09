@@ -15,6 +15,11 @@ namespace DreamSoccer.Repository.Implementations
         {
         }
 
+        public async Task<bool> CheckPlayerExistAsync(int playerId)
+        {
+            return (await GetAllAsync()).Any(n => n.PlayerId == playerId && n.DelFlag == false);
+        }
+
         public override async Task<TransferList> GetByIdAsync(int id)
         {
             return (await GetAllAsync())

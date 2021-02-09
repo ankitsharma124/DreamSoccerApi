@@ -5,7 +5,8 @@ namespace DreamSoccer.Core.Responses
 {
     public class BuyPlayerResultResponse
     {
-        public TeamDto Team { get; set; }
+        public TeamDto PreviousTeam { get; set; }
+        public TeamDto NextTeam { get; set; }
         public PlayerDto Player { get; set; }
     }
 }
