@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
+using DreamSoccer.Core.Dtos.Teams;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
@@ -59,15 +60,21 @@ namespace DreamSoccerApi_Test
             // Arrange
 
             httpContextAccessor = AuthorizationHelper.CreateUserLogin(httpContextAccessor, userId);
-            var players = new List<PlayerDto>();
-            players.Add(new PlayerDto()
+            var team = new TeamInformationDto();
+            team.TeamName = "Team 1";
+            team.Budget = 52000000;
+            var players = new List<PlayersInformationDto>();
+            team.Players = players;
+            players.Add(new PlayersInformationDto()
             {
                 FirstName = "Jhonatan",
                 Age = 20,
                 Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
-                Country = "UK"
+                Country = "UK",
+                Value = 100000
             });
-            teamService.Setup(_ => _.GetMyTeamAsync(It.IsAny<string>())).Returns(Task.FromResult(players.AsEnumerable()));
+
+            teamService.Setup(_ => _.GetMyTeamAsync(It.IsAny<string>())).Returns(Task.FromResult(team));
             // Actual
             // Actual
             var actual = await controller.GetMyPlayersAsync();
@@ -87,7 +94,7 @@ namespace DreamSoccerApi_Test
 
             httpContextAccessor = AuthorizationHelper.CreateUserLogin(httpContextAccessor, userId);
             var players = new List<PlayerDto>();
-            teamService.Setup(_ => _.GetMyTeamAsync(It.IsAny<string>())).Returns(Task.FromResult(players.AsEnumerable()));
+            teamService.Setup(_ => _.GetMyTeamAsync(It.IsAny<string>())).Returns(Task.FromResult<TeamInformationDto>(null));
             // Actual
             // Actual
             var actual = await controller.GetMyPlayersAsync();
@@ -227,7 +234,7 @@ namespace DreamSoccerApi_Test
         }
 
         [Theory]
-        [InlineData("English", "Team1", "Jhonatan", 1000000, 5000000, 2)]
+        [InlineData("UK", "Team1", "Jhonatan", 1000000, 5000000, 2)]
         public async Task GetAllPlayers_When_Data_Exist(string country, string teamName, string playerName, int minValue, int maxValue, int userId)
         {
             // Arrange
@@ -258,7 +265,7 @@ namespace DreamSoccerApi_Test
             teamService.Verify(mock => mock.GetAllPlayersAsync(It.IsAny<SearchPlayerFilter>()), Times.Once());
         }
         [Theory]
-        [InlineData("English", "Team1", "Jhonatan", 1000000, 5000000, 2)]
+        [InlineData("UK", "Team1", "Jhonatan", 1000000, 5000000, 2)]
         public async Task SearchPlayers_When_Data_Not_Found(string country, string teamName, string playerName, int minValue, int maxValue, int userId)
         {
             // Arrange
@@ -284,7 +291,7 @@ namespace DreamSoccerApi_Test
         }
 
         [Theory]
-        [InlineData("English", "Team1", "Jhonatan", 1000000, 5000000, 2)]
+        [InlineData("UK", "Team1", "Jhonatan", 1000000, 5000000, 2)]
         public async Task SearchPlayers_When_Data_Unhandled_Expection(string country, string teamName, string playerName, int minValue, int maxValue, int userId)
         {
             // Arrange
@@ -310,5 +317,110 @@ namespace DreamSoccerApi_Test
 
         #endregion
 
+
+        #region GetAllTeams
+        [Fact]
+        public void GetAllTeams_When_Access_By_Admin()
+        {
+            // Arrange
+            var nameMethod = nameof(controller.GetAllTeams);
+            var methodInformation = controller.GetType().GetMethod(nameMethod);
+
+            // Actual
+            var actualAttribute = methodInformation
+                .GetCustomAttributes(true)
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().ToArray();
+
+            // Assert
+            Assert.True(actualAttribute.Any());
+            Assert.Equal("Admin", actualAttribute[0].Roles);
+        }
+
+        [Theory]
+        [InlineData("UK", "Team1", 2)]
+        public async Task GetAllTeams_When_Data_Exist(string country, string teamName, int userId)
+        {
+            // Arrange
+            httpContextAccessor = AuthorizationHelper.CreateUserLogin(httpContextAccessor, userId);
+            var request = new SearchTeamRequest()
+            {
+                Country = country,
+                TeamName = teamName,
+            };
+
+            var players = new List<PlayersInformationDto>();
+            players.Add(new PlayersInformationDto()
+            {
+                FirstName = "Jhonatan",
+                Age = 20,
+                Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
+                Country = "UK"
+            });
+            var teams = new List<TeamInformationDto>() {
+                new TeamInformationDto()
+                {
+                    TeamName ="Team1",
+                    Country="UK",
+                    Players = players
+                }
+            };
+            teamService.Setup(_ => _.GetAllTeams(It.IsAny<SearchTeamFilter>())).Returns(Task.FromResult(teams.AsEnumerable()));
+            // Actual
+            // Actual
+            var actual = await controller.GetAllTeams(request);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), actual.GetType());
+            teamService.Verify(mock => mock.GetAllTeams(It.IsAny<SearchTeamFilter>()), Times.Once());
+        }
+        [Theory]
+        [InlineData("UK", "Team1", 2)]
+        public async Task GetAllTeams_When_Data_Not_Found(string country, string teamName, int userId)
+        {
+            // Arrange
+            httpContextAccessor = AuthorizationHelper.CreateUserLogin(httpContextAccessor, userId);
+            var request = new SearchTeamRequest()
+            {
+                Country = country,
+                TeamName = teamName,
+            };
+
+
+            var teams = new List<TeamInformationDto>();
+            teamService.Setup(_ => _.GetAllTeams(It.IsAny<SearchTeamFilter>())).Returns(Task.FromResult(teams.AsEnumerable()));
+            // Actual
+            // Actual
+            var actual = await controller.GetAllTeams(request);
+
+            // Assert
+            Assert.Equal(typeof(NotFoundObjectResult), actual.GetType());
+            teamService.Verify(mock => mock.GetAllTeams(It.IsAny<SearchTeamFilter>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData("UK", "Team1", 2)]
+        public async Task GetAllTeams_When_Data_Unhandled_Expection(string country, string teamName, int userId)
+        {
+            // Arrange
+            httpContextAccessor = AuthorizationHelper.CreateUserLogin(httpContextAccessor, userId);
+            var request = new SearchTeamRequest()
+            {
+                Country = country,
+                TeamName = teamName,
+            };
+
+
+            var teams = new List<TeamInformationDto>();
+            teamService.Setup(_ => _.GetAllTeams(It.IsAny<SearchTeamFilter>())).Throws(new ArgumentException("Connection Timeout"));
+            // Actual
+            // Actual
+            var actual = await controller.GetAllTeams(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            teamService.Verify(mock => mock.GetAllTeams(It.IsAny<SearchTeamFilter>()), Times.Once());
+        }
+
+        #endregion
     }
 }

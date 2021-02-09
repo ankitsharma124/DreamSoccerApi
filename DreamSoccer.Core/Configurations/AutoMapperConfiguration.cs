@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DreamSoccer.Core.Dtos.Players;
+using DreamSoccer.Core.Dtos.Teams;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
@@ -23,12 +24,20 @@ namespace DreamSoccer.Core.Configurations
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<User, UserOwnerDto>().ReverseMap();
             CreateMap<Player, PlayerDto>().ReverseMap();
+            CreateMap<Player, PlayersInformationDto>().ReverseMap();
             CreateMap<Team, TeamDto>()
             .ReverseMap();
             CreateMap<Team, TeamDto>().ForMember(dest => dest.TeamValue, opt => opt.MapFrom(m => m.Players.Sum(i => i.Value)));
+
+            CreateMap<Team, TeamInformationDto>()
+                .ForMember(dest => dest.TeamValue, opt => opt.MapFrom(m => m.Players.Sum(i => i.Value)))
+            .ReverseMap();
             CreateMap<SearchPlayerRequest, SearchPlayerFilter>().ReverseMap();
             CreateMap<BuyPlayerResult, BuyPlayerResultResponse>().ReverseMap();
             CreateMap<TransferList, SearchResultDto>().ReverseMap();
+
+            CreateMap<SearchTeamRequest, SearchTeamFilter>().ReverseMap();
+
         }
     }
 }

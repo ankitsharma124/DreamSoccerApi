@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
+using DreamSoccer.Core.Dtos.Players;
+using DreamSoccer.Core.Dtos.Teams;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Entities;
 
@@ -15,27 +17,29 @@ namespace DreamSoccer.Core.Contracts.Services
         private IPlayerRepository _playerRepository;
         private readonly ITransferListRepository _transferListRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ITeamRepository _teamRepository;
 
         public TeamService(IMapper mapper,
             IUserRepository userRepository,
             IPlayerRepository playerRepository,
             ITransferListRepository transferListRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ITeamRepository teamRepository)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _playerRepository = playerRepository;
             _transferListRepository = transferListRepository;
             _unitOfWork = unitOfWork;
+            _teamRepository = teamRepository;
         }
 
-        public async Task<IEnumerable<PlayerDto>> GetMyTeamAsync(string email)
+        public async Task<TeamInformationDto> GetMyTeamAsync(string email)
         {
-            var user = (await _userRepository.GetAllAsync()).FirstOrDefault(n => n.Email == email);
+            var user = await _userRepository.GetByEmailAsync(email);
             if (user != null)
             {
-                var players = await _playerRepository.GetPlayerByTeamIdAsync(user.TeamId.Value);
-                return _mapper.Map<List<PlayerDto>>(players);
+                return _mapper.Map<TeamInformationDto>(user.Team);
             }
             return null;
 
@@ -67,12 +71,18 @@ namespace DreamSoccer.Core.Contracts.Services
             return false;
         }
 
-    
+
 
         public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(SearchPlayerFilter input)
         {
             var players = await _playerRepository.SearchAsync(input);
             return _mapper.Map<List<PlayerDto>>(players);
+        }
+
+        public async Task<IEnumerable<TeamInformationDto>> GetAllTeams(SearchTeamFilter input)
+        {
+            var teams = await _teamRepository.SearchTeams(input);
+            return _mapper.Map<IEnumerable<TeamInformationDto>>(teams);
         }
     }
 }

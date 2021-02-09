@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using DreamSoccer.Core.Requests;
 using AutoMapper;
 using DreamSoccer.Core.Dtos.TransferList;
+using DreamSoccer.Core.Dtos.Teams;
 
 namespace DreamSoccerApi.Controllers
 {
@@ -35,16 +36,18 @@ namespace DreamSoccerApi.Controllers
         [Authorize(Roles = "Team_Owner")]
         public async Task<IActionResult> GetMyPlayersAsync()
         {
-            var response = new ServiceResponse<IEnumerable<PlayerDto>>();
+            var response = new ServiceResponse<TeamInformationDto>();
             try
             {
                 var email = CurrentEmail;
-                var players = await _teamService.GetMyTeamAsync(email);
-                response.Data = players;
+                var team = await _teamService.GetMyTeamAsync(email);
                 if (response.Success)
                 {
-                    if (players.Any())
+                    if (team != null)
+                    {
+                        response.Data = team;
                         return Ok(response);
+                    }
                 }
                 response.Success = false;
                 return NotFound(response);
@@ -71,7 +74,40 @@ namespace DreamSoccerApi.Controllers
                 if (response.Success)
                 {
                     if (players.Any())
+                    {
+                        response.Data = players;
                         return Ok(response);
+                    }
+                }
+                response.Success = false;
+                return NotFound(response);
+            }
+            catch (Exception exception)
+            {
+                response.Message = exception.Message;
+                response.Success = false;
+                return BadRequest(response);
+            }
+
+        }
+
+        [HttpPost("GetAllTeams")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllTeams(SearchTeamRequest request)
+        {
+            var response = new ServiceResponse<IEnumerable<TeamInformationDto>>();
+            try
+            {
+                var email = CurrentEmail;
+                var teams = await _teamService.GetAllTeams(_mapper.Map<SearchTeamFilter>(request));
+                response.Data = teams;
+                if (response.Success)
+                {
+                    if (teams.Any())
+                    {
+                        response.Data = teams;
+                        return Ok(response);
+                    }
                 }
                 response.Success = false;
                 return NotFound(response);

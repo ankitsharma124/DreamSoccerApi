@@ -19,6 +19,7 @@ namespace DreamSoccerApi_Test
         IMapper mapper;
         Mock<IPlayerRepository> playerRepository;
         Mock<ITransferListRepository> transferListRepository;
+        Mock<ITeamRepository> teamRepository;
         Mock<IUnitOfWork> unitOfWork;
         public TeamServiceTest()
         {
@@ -27,24 +28,18 @@ namespace DreamSoccerApi_Test
             mapper = AutoMapperHelper.Create();
             playerRepository = new Mock<IPlayerRepository>();
             unitOfWork = new Mock<IUnitOfWork>();
+            teamRepository = new Mock<ITeamRepository>();
             service = new TeamService(mapper, userRepository.Object, playerRepository.Object,
-                transferListRepository.Object, unitOfWork.Object);
+                transferListRepository.Object, unitOfWork.Object, teamRepository.Object);
         }
 
         #region GetMyTeam
-
 
         [Theory]
         [InlineData("test1@email.com")]
         public async Task GetMyTeam_When_Return_Data(string email)
         {
             // Arrange
-            var users = new List<User>();
-            users.Add(new User() { Email = "test1@email.com", TeamId = 2 });
-            userRepository.Setup(m =>
-                  m.GetAllAsync()
-                ).Returns(Task.FromResult(users.AsQueryable()));
-
             var players = new List<Player>();
             players.Add(new Player()
             {
@@ -53,17 +48,25 @@ namespace DreamSoccerApi_Test
                 Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
                 Country = "UK"
             });
-            playerRepository.Setup(m =>
-                  m.GetPlayerByTeamIdAsync(It.IsAny<int>())
-                ).Returns(Task.FromResult(players.AsQueryable()));
+            var team = new Team()
+            {
+                Budget = 5000000,
+                TeamName = "Team 1",
+                Players = players
+            };
+            var user = new User() { Email = "test1@email.com", TeamId = 2, Team = team };
+            userRepository.Setup(m =>
+                  m.GetByEmailAsync(It.IsAny<string>())
+                ).Returns(Task.FromResult(user));
+
 
             // Actual
             var actual = await service.GetMyTeamAsync(email);
 
             // Assert
-            userRepository.Verify(mock => mock.GetAllAsync(), Times.Once());
-            playerRepository.Verify(mock => mock.GetPlayerByTeamIdAsync(It.IsAny<int>()), Times.Once());
-            Assert.True(actual.Any());
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            Assert.NotNull(actual);
+            Assert.True(actual.Players.Any());
         }
 
         [Theory]
@@ -80,11 +83,11 @@ namespace DreamSoccerApi_Test
             var actual = await service.GetMyTeamAsync(email);
 
             // Assert
-            userRepository.Verify(mock => mock.GetAllAsync(), Times.Once());
-            playerRepository.Verify(mock => mock.GetPlayerByTeamIdAsync(It.IsAny<int>()), Times.Never());
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
             Assert.Null(actual);
         }
         #endregion
+
         #region GetAllPlayers
 
 
@@ -118,6 +121,7 @@ namespace DreamSoccerApi_Test
         }
 
         #endregion
+
         #region AddPlayerToMarket
 
         [Theory]
@@ -254,7 +258,50 @@ namespace DreamSoccerApi_Test
         }
         #endregion
 
+        #region GetAllTeams
 
+
+        [Theory]
+        [InlineData("Team 1")]
+        public async Task GetAllTeams_When_Return_Data(string teamName)
+        {
+            // Arrange
+            var input = new SearchTeamFilter
+            {
+                TeamName = teamName
+            };
+            
+            var players = new List<Player>();
+            players.Add(new Player()
+            {
+                FirstName = "Jhonatan",
+                Age = 20,
+                Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
+                Country = "UK"
+            });
+            var teams = new List<Team>()
+            {
+                new Team()
+                {
+                    TeamName ="Team 1",
+                    Budget=5000000,
+                    Country="US",
+                    Players = players
+                }
+            };
+            teamRepository.Setup(m =>
+                  m.SearchTeams(It.IsAny<SearchTeamFilter>())
+                ).Returns(Task.FromResult(teams.AsQueryable()));
+
+            // Actual
+            var actual = await service.GetAllTeams(input);
+
+            // Assert
+            teamRepository.Verify(mock => mock.SearchTeams(It.IsAny<SearchTeamFilter>()), Times.Once());
+            Assert.True(actual.Any());
+        }
+
+        #endregion
 
     }
 }
