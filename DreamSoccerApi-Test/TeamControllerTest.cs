@@ -111,7 +111,7 @@ namespace DreamSoccerApi_Test
                 PlayerId = palyerId
             };
             httpContextAccessor.CreateUserLogin(userId);
-            teamService.Setup(_ => _.AddPlayerToMarket(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(true));
+            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(true));
             // Actual
             // Actual
             var actual = await controller.AddPlayerToMarketAsycn(request);
@@ -119,7 +119,7 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(OkObjectResult), actual.GetType());
             httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
-            teamService.Verify(mock => mock.AddPlayerToMarket(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>()), Times.Once());
+            teamService.Verify(mock => mock.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>()), Times.Once());
         }
 
         [Theory]
@@ -133,7 +133,7 @@ namespace DreamSoccerApi_Test
                 PlayerId = palyerId
             };
             httpContextAccessor.CreateUserLogin(userId);
-            teamService.Setup(_ => _.AddPlayerToMarket(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(false));
+            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(false));
             // Actual
             // Actual
             var actual = await controller.AddPlayerToMarketAsycn(request);
@@ -141,7 +141,7 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
             httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
-            teamService.Verify(mock => mock.AddPlayerToMarket(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>()), Times.Once());
+            teamService.Verify(mock => mock.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>()), Times.Once());
         }
 
         [Theory]
@@ -155,7 +155,7 @@ namespace DreamSoccerApi_Test
                 PlayerId = palyerId
             };
             httpContextAccessor.CreateUserLogin(userId);
-            teamService.Setup(_ => _.AddPlayerToMarket(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Throws(new ArgumentException("Connection Timeout"));
+            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Throws(new ArgumentException("Connection Timeout"));
             // Actual
             // Actual
             var actual = await controller.AddPlayerToMarketAsycn(request);
@@ -163,7 +163,7 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
             httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
-            teamService.Verify(mock => mock.AddPlayerToMarket(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>()), Times.Once());
+            teamService.Verify(mock => mock.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>()), Times.Once());
         }
 
 

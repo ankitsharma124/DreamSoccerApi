@@ -44,7 +44,7 @@ namespace DreamSoccerApi.Controllers
             _teamService = teamService;
         }
 
-        #region Signup
+        #region GetMyPlayers
 
         [HttpGet("GetMyPlayers")]
         [Authorize(Roles = "Team_Owner")]
@@ -82,7 +82,7 @@ namespace DreamSoccerApi.Controllers
             try
             {
                 var email = CurrentEmail;
-                var result = await _teamService.AddPlayerToMarket(email, request.PlayerId, request.Price);
+                var result = await _teamService.AddPlayerToMarketAsync(email, request.PlayerId, request.Price);
                 response.Data = result;
                 if (response.Success && result)
                 {

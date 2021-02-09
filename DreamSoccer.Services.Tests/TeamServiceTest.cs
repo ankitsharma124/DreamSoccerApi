@@ -1,14 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
-using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
-using DreamSoccer.Core.Responses;
-using DreamSoccer.Repository.Context;
 using DreamSoccer.Services.Test.Helpers;
 using Moq;
 using Xunit;
@@ -115,7 +111,7 @@ namespace DreamSoccerApi_Test
                 ).Returns(Task.FromResult(player));
 
             // Actual
-            var actual = await service.AddPlayerToMarket(owner, playerId, price);
+            var actual = await service.AddPlayerToMarketAsync(owner, playerId, price);
 
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
@@ -150,7 +146,7 @@ namespace DreamSoccerApi_Test
                 ).Returns(Task.FromResult(player));
 
             // Actual
-            var actual = await service.AddPlayerToMarket(owner, playerId, price);
+            var actual = await service.AddPlayerToMarketAsync(owner, playerId, price);
 
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
@@ -168,9 +164,9 @@ namespace DreamSoccerApi_Test
         {
             // Arrange
             userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult<User>(null));
-            
+
             // Actual
-            var actual = await service.AddPlayerToMarket(owner, playerId, price);
+            var actual = await service.AddPlayerToMarketAsync(owner, playerId, price);
 
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
@@ -178,9 +174,11 @@ namespace DreamSoccerApi_Test
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
             Assert.False(actual);
-            Assert.Equal("User doesn't exist",service.CurrentMessage);
+            Assert.Equal("User doesn't exist", service.CurrentMessage);
         }
         #endregion
+
+
 
     }
 }

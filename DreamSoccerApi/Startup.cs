@@ -49,7 +49,9 @@ namespace DreamSoccerApi
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITeamService, TeamService>();
-            
+            services.AddScoped<ITransferListService, TransferListService>(); 
+
+
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {

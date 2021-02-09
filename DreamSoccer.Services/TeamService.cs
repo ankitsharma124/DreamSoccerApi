@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -41,7 +40,7 @@ namespace DreamSoccer.Core.Contracts.Services
 
         }
 
-        public async Task<bool> AddPlayerToMarket(string owner, int playerId, long price)
+        public async Task<bool> AddPlayerToMarketAsync(string owner, int playerId, long price)
         {
             var user = await _userRepository.GetByEmailAsync(owner);
             if (user == null)
