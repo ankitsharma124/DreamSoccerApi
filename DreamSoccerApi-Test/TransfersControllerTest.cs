@@ -65,13 +65,17 @@ namespace DreamSoccerApi_Test
                 MaxValue = maxValue,
                 MinValue = minValue
             };
-            var players = new List<PlayerDto>();
-            players.Add(new PlayerDto()
+            var players = new List<SearchResultDto>();
+            players.Add(new SearchResultDto()
             {
-                FirstName = "Jhonatan",
-                Age = 20,
-                Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
-                Country = "UK"
+                Id = 1,
+                Player = new PlayerDto()
+                {
+                    FirstName = "Jhonatan",
+                    Age = 20,
+                    Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
+                    Country = "UK"
+                }
             });
             _service.Setup(_ => _.SearchPlayerInMarketAsync(It.IsAny<SearchPlayerFilter>())).Returns(Task.FromResult(players.AsEnumerable()));
             // Actual
@@ -95,8 +99,8 @@ namespace DreamSoccerApi_Test
                 MaxValue = maxValue,
                 MinValue = minValue
             };
-            var players = new List<PlayerDto>();
-           
+            var players = new List<SearchResultDto>();
+
             _service.Setup(_ => _.SearchPlayerInMarketAsync(It.IsAny<SearchPlayerFilter>())).Returns(Task.FromResult(players.AsEnumerable()));
             // Actual
             // Actual
@@ -120,7 +124,7 @@ namespace DreamSoccerApi_Test
                 MaxValue = maxValue,
                 MinValue = minValue
             };
-          
+
             _service.Setup(_ => _.SearchPlayerInMarketAsync(It.IsAny<SearchPlayerFilter>())).Throws(new ArgumentException("Connection Timeout"));
             // Actual
             // Actual
@@ -129,6 +133,101 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
             _service.Verify(mock => mock.SearchPlayerInMarketAsync(It.IsAny<SearchPlayerFilter>()), Times.Once());
+        }
+
+        #endregion
+
+        #region Buy
+        [Fact]
+        public void Buy_When_Access_By_Team_Owner()
+        {
+            // Arrange
+            var nameMethod = nameof(_controller.BuyPlayerAsync);
+            var methodInformation = _controller.GetType().GetMethod(nameMethod);
+
+            // Actual
+            var actualAttribute = methodInformation
+                .GetCustomAttributes(true)
+                .OfType<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().ToArray();
+
+            // Assert
+            Assert.True(actualAttribute.Any());
+            Assert.Equal("Team_Owner", actualAttribute[0].Roles);
+        }
+
+        [Theory]
+        [InlineData(2, 2)]
+        public async Task Buy_When_Data_Exist(int transferId, int userId)
+        {
+            // Arrange
+            _httpContextAccessor = AuthorizationHelper.CreateUserLogin(_httpContextAccessor, userId);
+            var request = new BuyPlayerRequest()
+            {
+                TrasnferId = transferId
+            };
+            var result = new BuyPlayerResult()
+            {
+                Player = new Player()
+                {
+                    Id = 1,
+                },
+                Team = new Team()
+                {
+                    Id = 1,
+                    TeamName = "Team Destination"
+                }
+
+            };
+            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>())).Returns(Task.FromResult(result));
+
+            // Actual
+            var actual = await _controller.BuyPlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(OkObjectResult), actual.GetType());
+            _httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
+            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once());
+        }
+        [Theory]
+        [InlineData(2, 2)]
+        public async Task Buy_When_Data_Not_Found(int transferId, int userId)
+        {
+            // Arrange
+            _httpContextAccessor = AuthorizationHelper.CreateUserLogin(_httpContextAccessor, userId);
+            var request = new BuyPlayerRequest()
+            {
+                TrasnferId = transferId
+            };
+            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>())).Returns(Task.FromResult<BuyPlayerResult>(null));
+
+            // Actual
+            var actual = await _controller.BuyPlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(NotFoundObjectResult), actual.GetType());
+            _httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
+            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(2, 2)]
+        public async Task Buy_When_Data_Unhandled_Expection(int transferId, int userId)
+        {
+            // Arrange
+            _httpContextAccessor = AuthorizationHelper.CreateUserLogin(_httpContextAccessor, userId);
+            var request = new BuyPlayerRequest()
+            {
+                TrasnferId = transferId
+            };
+            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>())).Throws(new ArgumentException("Connection Timeout"));
+
+            // Actual
+            var actual = await _controller.BuyPlayerAsync(request);
+
+            // Assert
+            Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
+            _httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
+            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once());
         }
 
         #endregion

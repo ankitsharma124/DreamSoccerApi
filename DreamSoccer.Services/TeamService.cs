@@ -49,13 +49,14 @@ namespace DreamSoccer.Core.Contracts.Services
                 return false;
             }
             var player = await _playerRepository.GetByIdAsync(playerId);
-            if (player!=null  && player.Team.Owner.Email == user.Email)
-            {
-                var model = new TransferList() { Player = player, Value = price };
-                await _transferListRepository.CreateAsync(model);
-                await _unitOfWork.SaveChangesAsync();
-                return true;
-            }
+            if (player != null)
+                if (player.Team.Owner.Email == user.Email)
+                {
+                    var model = new TransferList() { Player = player, Value = price };
+                    await _transferListRepository.CreateAsync(model);
+                    await _unitOfWork.SaveChangesAsync();
+                    return true;
+                }
             CurrentMessage = "Player not in our Team";
             return false;
         }

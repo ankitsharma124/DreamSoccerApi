@@ -35,13 +35,13 @@ namespace DreamSoccerApi.Controllers
             _mapper = mapper;
         }
 
-        #region Signup
+        #region SearchPlayer
 
         [HttpPost("SearchPlayers")]
         [Authorize(Roles = "Team_Owner")]
         public async Task<IActionResult> GetSearchPlayerAsync(SearchPlayerRequest request)
         {
-            var response = new ServiceResponse<IEnumerable<PlayerDto>>();
+            var response = new ServiceResponse<IEnumerable<SearchResultDto>>();
             try
             {
                 var filter = _mapper.Map<SearchPlayerFilter>(request);
@@ -53,6 +53,41 @@ namespace DreamSoccerApi.Controllers
                 }
                 else
                 {
+                    response.Success = false;
+                    return NotFound(response);
+                }
+            }
+            catch (Exception exception)
+            {
+                response.Message = exception.Message;
+                response.Success = false;
+                return BadRequest(response);
+            }
+
+        }
+
+        #endregion
+
+        #region Buy
+
+        [HttpPost("Buy")]
+        [Authorize(Roles = "Team_Owner")]
+        public async Task<IActionResult> BuyPlayerAsync(BuyPlayerRequest request)
+        {
+            var response = new ServiceResponse<BuyPlayerResultResponse>();
+            try
+            {
+                var email = CurrentEmail;
+                var result = await _transferListService.BuyPlayerAsync(request.TrasnferId, email);
+
+                if (response.Success && result != null)
+                {
+                    response.Data = _mapper.Map<BuyPlayerResultResponse>(result);
+                    return Ok(response);
+                }
+                else
+                {
+                    response.Success = false;
                     return NotFound(response);
                 }
             }

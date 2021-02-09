@@ -62,6 +62,7 @@ namespace DreamSoccerApi.Controllers
                 }
                 else
                 {
+                    response.Success = false;
                     return NotFound(response);
                 }
             }
@@ -90,6 +91,7 @@ namespace DreamSoccerApi.Controllers
                 }
                 else
                 {
+                    response.Success = false;
                     return BadRequest(response);
                 }
             }

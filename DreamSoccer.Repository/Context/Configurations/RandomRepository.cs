@@ -16,7 +16,8 @@ namespace DreamSoccer.Repository.Context
                 .RuleFor(u => u.FirstName, (f, u) => f.Name.FirstName())
                 .RuleFor(u => u.Country, (f, u) => f.Address.Country())
                 .RuleFor(u => u.Age, (f, u) => f.Random.Int(18, 40))
-                .RuleFor(u => u.LastName, (f, u) => f.Name.LastName());
+                .RuleFor(u => u.LastName, (f, u) => f.Name.LastName())
+                .RuleFor(u => u.Value, (f, u) => f.Random.Int(10, 100));
             _teamPlayer = new Faker<Team>()
                .RuleFor(u => u.Country, (f, u) => f.Address.Country())
                .RuleFor(u => u.TeamName, (f, u) => f.Company.CompanyName());
@@ -26,6 +27,11 @@ namespace DreamSoccer.Repository.Context
         public Task<Player> GetRandomPlayer()
         {
             return Task.FromResult(_fakePlayer.Generate());
+        }
+
+        public Task<long> GetRandomRatioForIncreaseValue()
+        {
+            return Task.FromResult(_fakePlayer.Generate().Value);
         }
 
         public Task<Team> GetRandomTeam()

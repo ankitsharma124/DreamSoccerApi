@@ -6,6 +6,7 @@ using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Entities;
+using DreamSoccer.Repository.Context;
 using DreamSoccer.Services.Test.Helpers;
 using Moq;
 using Xunit;
@@ -18,15 +19,21 @@ namespace DreamSoccerApi_Test
         IMapper mapper;
         Mock<IPlayerRepository> playerRepository;
         Mock<ITransferListRepository> transferListRepository;
+        Mock<IUserRepository> userRepository;
+        Mock<IRandomRepository> randomRepository;
+        Mock<ITeamRepository> teamRepository;
         Mock<IUnitOfWork> unitOfWork;
         public TransferListServiceTest()
         {
             transferListRepository = new Mock<ITransferListRepository>();
             mapper = AutoMapperHelper.Create();
             playerRepository = new Mock<IPlayerRepository>();
+            randomRepository = new Mock<IRandomRepository>();
+            teamRepository = new Mock<ITeamRepository>();
+            userRepository = new Mock<IUserRepository>();
             unitOfWork = new Mock<IUnitOfWork>();
             service = new TransferListService(mapper, playerRepository.Object,
-                transferListRepository.Object, unitOfWork.Object);
+                transferListRepository.Object, unitOfWork.Object, teamRepository.Object, userRepository.Object, randomRepository.Object);
         }
         #region SearchPlayerOnMarketList
 
@@ -54,7 +61,7 @@ namespace DreamSoccerApi_Test
                     Country = "English",
                     Team = new Team()
                     {
-                        TeamName ="Team1"
+                        TeamName = "Team1"
                     }
                 },
                 Value = 3000000
@@ -71,6 +78,232 @@ namespace DreamSoccerApi_Test
         }
 
 
+        #endregion
+
+        #region BuyPlayer
+
+        [Theory]
+        [InlineData(1, "test1@email.com")]
+        public async Task BuyPlayer_When_Success(int transferId, string owner)
+        {
+            // Arrange
+            var transferPlayer = new TransferList()
+            {
+                PlayerId = 1,
+                Id = 2,
+                Value = 2000000,
+                Player = new Player()
+                {
+                    Id = 1,
+                    FirstName = "Jhonatan",
+                    LastName = "Christian"
+                }
+            };
+            transferListRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult(transferPlayer));
+
+
+            var user = new User() { Email = "test1@email.com", TeamId = 2 };
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
+            var team = new Team()
+            {
+                TeamName = "Team Destination",
+                Id = 2,
+                Budget = 10000000
+            };
+            teamRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>())).Returns(Task.FromResult(team));
+
+            var increaseValue = new RandomRepository().GetRandomRatioForIncreaseValue();
+            randomRepository.Setup(mock => mock.GetRandomRatioForIncreaseValue()).Returns(increaseValue);
+
+
+            // Actual
+            var actual = await service.BuyPlayerAsync(transferId, owner);
+
+            // Assert
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Once());
+            transferListRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
+            randomRepository.Verify(mock => mock.GetRandomRatioForIncreaseValue(), Times.Once());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Once());
+            teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Once());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Once());
+            playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
+            Assert.NotNull(actual);
+            Assert.Equal(8000000, actual.Team.Budget);
+        }
+        [Theory]
+        [InlineData(1, "test1@email.com")]
+        public async Task BuyPlayer_When_Budget_Player_Not_Exist(int transferId, string owner)
+        {
+            // Arrange
+
+            transferListRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult<TransferList>(null));
+
+
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult<User>(null));
+
+
+
+
+            // Actual
+            var actual = await service.BuyPlayerAsync(transferId, owner);
+
+            // Assert
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            transferListRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Never());
+            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            randomRepository.Verify(mock => mock.GetRandomRatioForIncreaseValue(), Times.Never());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
+            teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            Assert.Null(actual);
+            Assert.Equal("Player not exists", service.CurrentMessage);
+        }
+        [Theory]
+        [InlineData(1, "test1@email.com")]
+        public async Task BuyPlayer_When_Budget_User_Not_Exist(int transferId, string owner)
+        {
+            // Arrange
+            var transferPlayer = new TransferList()
+            {
+                PlayerId = 1,
+                Id = 2,
+                Value = 2000000,
+                Player = new Player()
+                {
+                    Id = 1,
+                    FirstName = "Jhonatan",
+                    LastName = "Christian"
+                }
+            };
+            transferListRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult(transferPlayer));
+
+
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult<User>(null));
+
+
+
+
+            // Actual
+            var actual = await service.BuyPlayerAsync(transferId, owner);
+
+            // Assert
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            transferListRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            randomRepository.Verify(mock => mock.GetRandomRatioForIncreaseValue(), Times.Never());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
+            teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            Assert.Null(actual);
+            Assert.Equal("User not exists", service.CurrentMessage);
+        }
+        [Theory]
+        [InlineData(1, "test1@email.com")]
+        public async Task BuyPlayer_When_Budget_Team_Not_Exist(int transferId, string owner)
+        {
+            // Arrange
+            var transferPlayer = new TransferList()
+            {
+                PlayerId = 1,
+                Id = 2,
+                Value = 2000000,
+                Player = new Player()
+                {
+                    Id = 1,
+                    FirstName = "Jhonatan",
+                    LastName = "Christian"
+                }
+            };
+            transferListRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult(transferPlayer));
+
+
+            var user = new User() { Email = "test1@email.com" };
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
+
+            teamRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>())).Returns(Task.FromResult<Team>(null));
+
+
+
+            // Actual
+            var actual = await service.BuyPlayerAsync(transferId, owner);
+
+            // Assert
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            transferListRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            randomRepository.Verify(mock => mock.GetRandomRatioForIncreaseValue(), Times.Never());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
+            teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            Assert.Null(actual);
+            Assert.Equal("Team not exists", service.CurrentMessage);
+        }
+
+        [Theory]
+        [InlineData(1, "test1@email.com")]
+        public async Task BuyPlayer_When_Budget_Not_Enough(int transferId, string owner)
+        {
+            // Arrange
+            var transferPlayer = new TransferList()
+            {
+                PlayerId = 1,
+                Id = 2,
+                Value = 2000000,
+                Player = new Player()
+                {
+                    Id = 1,
+                    FirstName = "Jhonatan",
+                    LastName = "Christian"
+                }
+            };
+            transferListRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult(transferPlayer));
+
+
+            var user = new User() { Email = "test1@email.com", TeamId = 2 };
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
+            var team = new Team()
+            {
+                TeamName = "Team Destination",
+                Id = 2,
+                Budget = 1000000
+            };
+            teamRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>())).Returns(Task.FromResult(team));
+
+
+            // Actual
+            var actual = await service.BuyPlayerAsync(transferId, owner);
+
+            // Assert
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            transferListRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
+            randomRepository.Verify(mock => mock.GetRandomRatioForIncreaseValue(), Times.Never());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
+            teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());
+            unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
+            playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            Assert.Null(actual);
+            Assert.Equal("Budget not enough", service.CurrentMessage);
+        }
         #endregion
     }
 }

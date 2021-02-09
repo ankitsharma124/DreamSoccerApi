@@ -7,5 +7,7 @@ namespace DreamSoccer.Core.Contracts.Repositories
     {
         public Task<Player> GetRandomPlayer();
         public Task<Team> GetRandomTeam();
+
+        public Task<long> GetRandomRatioForIncreaseValue();
     }
 }

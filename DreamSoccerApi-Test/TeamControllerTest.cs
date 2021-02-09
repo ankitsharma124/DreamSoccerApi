@@ -52,13 +52,8 @@ namespace DreamSoccerApi_Test
         public async Task GetMyMembers_When_User_Exist(int userId)
         {
             // Arrange
-            var identity = new GenericIdentity(userId.ToString());
-            var contextUser = new ClaimsPrincipal(identity); //add claims as needed
-            var context = new DefaultHttpContext()
-            {
-                User = contextUser
-            };
-            httpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+           
+            httpContextAccessor = AuthorizationHelper.CreateUserLogin(httpContextAccessor, userId);
             var players = new List<PlayerDto>();
             players.Add(new PlayerDto()
             {

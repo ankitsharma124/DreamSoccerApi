@@ -15,6 +15,11 @@ namespace DreamSoccer.Repository.Implementations
         {
         }
 
+        public override async Task<TransferList> GetByIdAsync(int id)
+        {
+            return (await GetAllAsync())
+                .Include(n => n.Player).FirstOrDefault(n => n.Id == id);
+        }
         public async Task<IQueryable<TransferList>> SearchPlayerAsync(SearchPlayerFilter input)
         {
             var query = await GetAllAsync();

@@ -4,6 +4,7 @@ using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Core.Requests;
+using DreamSoccer.Core.Responses;
 
 namespace DreamSoccer.Core.Configurations
 {
@@ -16,7 +17,8 @@ namespace DreamSoccer.Core.Configurations
             CreateMap<Player, PlayerDto>().ReverseMap();
             CreateMap<Team, TeamDto>().ReverseMap();
             CreateMap<SearchPlayerRequest, SearchPlayerFilter>().ReverseMap();
-
+            CreateMap<BuyPlayerResult, BuyPlayerResultResponse>().ReverseMap();
+            CreateMap<TransferList, SearchResultDto>().ReverseMap();
         }
     }
 }
