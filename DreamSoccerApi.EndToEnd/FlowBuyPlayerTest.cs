@@ -70,7 +70,7 @@ namespace DreamSoccerApi.E2E
             // Arrange
             var createFakeUser = new BuyPlayerRequest()
             {
-                TrasnferId = trasnferId
+                TransferId = trasnferId
             };
             var content = new StringContent(JsonConvert.SerializeObject(createFakeUser), Encoding.UTF8, "application/json");
             // Act

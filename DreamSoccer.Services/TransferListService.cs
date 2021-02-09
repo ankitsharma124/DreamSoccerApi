@@ -17,6 +17,7 @@ namespace DreamSoccer.Core.Contracts.Services
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
         private readonly IRandomRepository _randomRepository;
+        private readonly ICurrentUserRepository _currentUserRepository;
 
         public TransferListService(IMapper mapper,
             IPlayerRepository playerRepository,
@@ -24,7 +25,8 @@ namespace DreamSoccer.Core.Contracts.Services
             IUnitOfWork unitOfWork,
             ITeamRepository teamRepository,
             IUserRepository userRepository,
-            IRandomRepository randomRepository)
+            IRandomRepository randomRepository,
+            ICurrentUserRepository currentUserRepository)
         {
             _mapper = mapper;
             _playerRepository = playerRepository;
@@ -33,10 +35,12 @@ namespace DreamSoccer.Core.Contracts.Services
             _teamRepository = teamRepository;
             _userRepository = userRepository;
             _randomRepository = randomRepository;
+            _currentUserRepository = currentUserRepository;
         }
 
-        public async Task<BuyPlayerResult> BuyPlayerAsync(int transferId, string owner)
+        public async Task<BuyPlayerResult> BuyPlayerAsync(int transferId, string owner, int teamId = -1)
         {
+            var role = _currentUserRepository.Role;
             var player = await _transferListRepository.GetByIdAsync(transferId);
             if (player == null)
             {
@@ -44,23 +48,25 @@ namespace DreamSoccer.Core.Contracts.Services
                 return null;
             }
             var user = await _userRepository.GetByEmailAsync(owner);
-            var teamId = -1;
-            if (user?.TeamId != null && user.TeamId.HasValue)
-                teamId = user.TeamId.Value;
+            if (role != RoleEnum.Admin)
+            {
+                if (user?.TeamId != null && user.TeamId.HasValue)
+                    teamId = user.TeamId.Value;
+            }
             if (user == null)
             {
                 CurrentMessage = "User not exists";
                 return null;
             }
-            if (teamId == -1)
+            var team = await _teamRepository.GetByIdAsync(teamId);
+            if (team == null)
             {
                 CurrentMessage = "Team not exists";
                 return null;
             }
-            var team = await _teamRepository.GetByIdAsync(teamId);
             if (team.Budget >= player.Value)
             {
-                if(team.Id == player.Player.TeamId)
+                if (team.Id == player.Player.TeamId)
                 {
                     CurrentMessage = "This player in your team";
                     return null;

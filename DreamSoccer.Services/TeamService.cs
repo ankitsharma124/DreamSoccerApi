@@ -57,8 +57,10 @@ namespace DreamSoccer.Core.Contracts.Services
                 return false;
             }
             var player = await _playerRepository.GetByIdAsync(playerId);
+
             if (player != null)
-                if (player.Team.Owner.Email == user.Email)
+
+                if (player.Team.Owner.Email == user.Email || _currentUserRepository.Role == RoleEnum.Admin)
                 {
                     if (await _transferListRepository.CheckPlayerExistAsync(player.Id))
                     {

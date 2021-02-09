@@ -9,6 +9,6 @@ namespace DreamSoccer.Core.Contracts.Services
     {
         Task<IEnumerable<SearchResultDto>> SearchPlayerInMarketAsync(SearchPlayerFilter input);
 
-        Task<BuyPlayerResult> BuyPlayerAsync(int transferId, string owner);
+        Task<BuyPlayerResult> BuyPlayerAsync(int transferId, string owner, int teamId = -1);
     }
 }

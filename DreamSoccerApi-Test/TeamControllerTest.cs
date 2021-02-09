@@ -526,7 +526,7 @@ namespace DreamSoccerApi_Test
 
         #region DeletePlayer
         [Fact]
-        public void DeletePlayer_When_Access_By_Team_Owner()
+        public void DeletePlayer_When_Access_By_Admin()
         {
             // Arrange
             var nameMethod = nameof(controller.DeletePlayerAsync);
@@ -539,7 +539,7 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.True(actualAttribute.Any());
-            Assert.Equal("Team_Owner,Admin", actualAttribute[0].Roles);
+            Assert.Equal("Admin", actualAttribute[0].Roles);
         }
 
         [Theory]

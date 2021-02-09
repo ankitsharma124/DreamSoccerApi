@@ -38,7 +38,7 @@ namespace DreamSoccerApi.Controllers
         #region SearchPlayer
 
         [HttpPost("SearchPlayers")]
-        [Authorize(Roles = "Team_Owner")]
+        [Authorize(Roles = "Team_Owner,Admin")]
         public async Task<IActionResult> GetSearchPlayerAsync(SearchPlayerRequest request)
         {
             var response = new ServiceResponse<IEnumerable<SearchResultDto>>();
@@ -69,14 +69,14 @@ namespace DreamSoccerApi.Controllers
         #region Buy
 
         [HttpPost("Buy")]
-        [Authorize(Roles = "Team_Owner")]
+        [Authorize(Roles = "Team_Owner,Admin")]
         public async Task<IActionResult> BuyPlayerAsync(BuyPlayerRequest request)
         {
             var response = new ServiceResponse<BuyPlayerResultResponse>();
             try
             {
                 var email = CurrentEmail;
-                var result = await _transferListService.BuyPlayerAsync(request.TrasnferId, email);
+                var result = await _transferListService.BuyPlayerAsync(request.TransferId, email, request.TeamId);
 
                 if (response.Success)
                 {

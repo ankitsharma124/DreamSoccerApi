@@ -23,6 +23,7 @@ namespace DreamSoccerApi_Test
         Mock<IUserRepository> userRepository;
         Mock<IRandomRepository> randomRepository;
         Mock<ITeamRepository> teamRepository;
+        Mock<ICurrentUserRepository> currentUserRepository;
         Mock<IUnitOfWork> unitOfWork;
         public TransferListServiceTest()
         {
@@ -32,9 +33,15 @@ namespace DreamSoccerApi_Test
             randomRepository = new Mock<IRandomRepository>();
             teamRepository = new Mock<ITeamRepository>();
             userRepository = new Mock<IUserRepository>();
+            currentUserRepository = new Mock<ICurrentUserRepository>();
             unitOfWork = new Mock<IUnitOfWork>();
             service = new TransferListService(mapper, playerRepository.Object,
-                transferListRepository.Object, unitOfWork.Object, teamRepository.Object, userRepository.Object, randomRepository.Object);
+                transferListRepository.Object,
+                unitOfWork.Object,
+                teamRepository.Object,
+                userRepository.Object,
+                randomRepository.Object,
+                currentUserRepository.Object);
         }
         #region SearchPlayerOnMarketList
 
@@ -308,7 +315,7 @@ namespace DreamSoccerApi_Test
             transferListRepository.Verify(mock => mock.DeleteAsync(It.IsAny<int>()), Times.Never());
             transferListRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once);
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
-            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
+            teamRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
             randomRepository.Verify(mock => mock.GetRandomRatioForIncreaseValue(), Times.Never());
             playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
             teamRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Team>()), Times.Never());

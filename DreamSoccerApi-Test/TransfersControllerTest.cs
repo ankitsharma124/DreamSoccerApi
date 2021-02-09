@@ -36,7 +36,7 @@ namespace DreamSoccerApi_Test
         }
         #region SearchPlayers
         [Fact]
-        public void SearchPlayers_When_Access_By_Team_Owner()
+        public void SearchPlayers_When_Access_By_Team_Owner_And_Admin()
         {
             // Arrange
             var nameMethod = nameof(_controller.GetSearchPlayerAsync);
@@ -49,7 +49,7 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.True(actualAttribute.Any());
-            Assert.Equal("Team_Owner", actualAttribute[0].Roles);
+            Assert.Equal("Team_Owner,Admin", actualAttribute[0].Roles);
         }
 
         [Theory]
@@ -139,7 +139,7 @@ namespace DreamSoccerApi_Test
 
         #region Buy
         [Fact]
-        public void Buy_When_Access_By_Team_Owner()
+        public void Buy_When_Access_By_Team_Owner_And_Admin()
         {
             // Arrange
             var nameMethod = nameof(_controller.BuyPlayerAsync);
@@ -152,7 +152,7 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.True(actualAttribute.Any());
-            Assert.Equal("Team_Owner", actualAttribute[0].Roles);
+            Assert.Equal("Team_Owner,Admin", actualAttribute[0].Roles);
         }
 
         [Theory]
@@ -163,7 +163,7 @@ namespace DreamSoccerApi_Test
             _httpContextAccessor = AuthorizationHelper.CreateUserLogin(_httpContextAccessor, userId);
             var request = new BuyPlayerRequest()
             {
-                TrasnferId = transferId
+                TransferId = transferId
             };
             var result = new BuyPlayerResult()
             {
@@ -178,7 +178,7 @@ namespace DreamSoccerApi_Test
                 }
 
             };
-            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>())).Returns(Task.FromResult(result));
+            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>(),It.IsAny<int>())).Returns(Task.FromResult(result));
 
             // Actual
             var actual = await _controller.BuyPlayerAsync(request);
@@ -186,7 +186,7 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(OkObjectResult), actual.GetType());
             _httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
-            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once());
+            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>(),It.IsAny<int>()), Times.Once());
         }
         [Theory]
         [InlineData(2, 2)]
@@ -196,9 +196,9 @@ namespace DreamSoccerApi_Test
             _httpContextAccessor = AuthorizationHelper.CreateUserLogin(_httpContextAccessor, userId);
             var request = new BuyPlayerRequest()
             {
-                TrasnferId = transferId
+                TransferId = transferId
             };
-            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>())).Returns(Task.FromResult<BuyPlayerResult>(null));
+            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>(),It.IsAny<int>())).Returns(Task.FromResult<BuyPlayerResult>(null));
 
             // Actual
             var actual = await _controller.BuyPlayerAsync(request);
@@ -206,7 +206,7 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(NotFoundObjectResult), actual.GetType());
             _httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
-            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once());
+            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>(),It.IsAny<int>()), Times.Once());
         }
 
         [Theory]
@@ -217,9 +217,9 @@ namespace DreamSoccerApi_Test
             _httpContextAccessor = AuthorizationHelper.CreateUserLogin(_httpContextAccessor, userId);
             var request = new BuyPlayerRequest()
             {
-                TrasnferId = transferId
+                TransferId = transferId
             };
-            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>())).Throws(new ArgumentException("Connection Timeout"));
+            _service.Setup(_ => _.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>(),It.IsAny<int>())).Throws(new ArgumentException("Connection Timeout"));
 
             // Actual
             var actual = await _controller.BuyPlayerAsync(request);
@@ -227,7 +227,7 @@ namespace DreamSoccerApi_Test
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
             _httpContextAccessor.Verify(mock => mock.HttpContext, Times.Once());
-            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>()), Times.Once());
+            _service.Verify(mock => mock.BuyPlayerAsync(It.IsAny<int>(), It.IsAny<string>(),It.IsAny<int>()), Times.Once());
         }
 
         #endregion        

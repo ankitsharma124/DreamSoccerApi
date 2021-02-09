@@ -162,17 +162,17 @@ namespace DreamSoccerApi.Controllers
                 var email = CurrentEmail;
                 var result = await _teamService.UpdatePlayerAsync(_mapper.Map<PlayerDto>(request));
                 response.Data = result;
-                if (response.Success && result != null)
+                if (response.Success)
                 {
-                    response.Data = result;
-                    return Ok(response);
+                    if (result != null)
+                    {
+                        response.Data = result;
+                        return Ok(response);
+                    }
                 }
-                else
-                {
-                    response.Success = false;
-                    response.Message = _teamService.CurrentMessage;
-                    return BadRequest(response);
-                }
+                response.Success = false;
+                response.Message = _teamService.CurrentMessage;
+                return BadRequest(response);
             }
             catch (Exception exception)
             {
@@ -184,7 +184,7 @@ namespace DreamSoccerApi.Controllers
         }
 
         [HttpDelete("DeletePlayer")]
-        [Authorize(Roles = "Team_Owner,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeletePlayerAsync(PlayerReqeust request)
         {
             var response = new ServiceResponse<PlayerDto>();
@@ -193,17 +193,17 @@ namespace DreamSoccerApi.Controllers
                 var email = CurrentEmail;
                 var result = await _teamService.DeletePlayerAsync(_mapper.Map<PlayerDto>(request));
                 response.Data = result;
-                if (response.Success && result != null)
+                if (response.Success)
                 {
-                    response.Data = result;
-                    return Ok(response);
+                    if (result != null)
+                    {
+                        response.Data = result;
+                        return Ok(response);
+                    }
                 }
-                else
-                {
-                    response.Success = false;
-                    response.Message = _teamService.CurrentMessage;
-                    return BadRequest(response);
-                }
+                response.Success = false;
+                response.Message = _teamService.CurrentMessage;
+                return BadRequest(response);
             }
             catch (Exception exception)
             {
@@ -224,17 +224,17 @@ namespace DreamSoccerApi.Controllers
                 var email = CurrentEmail;
                 var result = await _teamService.UpdateTeamAsync(_mapper.Map<TeamDto>(request));
                 response.Data = result;
-                if (response.Success && result != null)
+                if (response.Success)
                 {
-                    response.Data = result;
-                    return Ok(response);
+                    if (result != null)
+                    {
+                        response.Data = result;
+                        return Ok(response);
+                    }
                 }
-                else
-                {
-                    response.Success = false;
-                    response.Message = _teamService.CurrentMessage;
-                    return BadRequest(response);
-                }
+                response.Success = false;
+                response.Message = _teamService.CurrentMessage;
+                return BadRequest(response);
             }
             catch (Exception exception)
             {

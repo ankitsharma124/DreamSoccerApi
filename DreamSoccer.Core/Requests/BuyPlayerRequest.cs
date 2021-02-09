@@ -5,6 +5,8 @@ namespace DreamSoccer.Core.Dtos.User
     public class BuyPlayerRequest
     {
         [Required]
-        public int TrasnferId { get; set; }
+        public int TransferId { get; set; }
+        public int TeamId { get; set; }
+
     }
 }
