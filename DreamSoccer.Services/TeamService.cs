@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
+using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Entities;
 
 namespace DreamSoccer.Core.Contracts.Services
@@ -36,7 +37,7 @@ namespace DreamSoccer.Core.Contracts.Services
                 var players = await _playerRepository.GetPlayerByTeamIdAsync(user.TeamId.Value);
                 return _mapper.Map<List<PlayerDto>>(players);
             }
-            return new List<PlayerDto>();
+            return null;
 
         }
 
@@ -64,6 +65,14 @@ namespace DreamSoccer.Core.Contracts.Services
                 }
             CurrentMessage = "Player not in our Team";
             return false;
+        }
+
+    
+
+        public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(SearchPlayerFilter input)
+        {
+            var players = await _playerRepository.SearchAsync(input);
+            return _mapper.Map<List<PlayerDto>>(players);
         }
     }
 }

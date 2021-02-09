@@ -17,7 +17,7 @@ namespace DreamSoccerApi.E2E
         const int TOTAL_PLAYER = 20;
         private readonly WebApiTesterFactory _factory;
 
-        public MyControllerTests(WebApiTesterFactory factory)
+        public FlowBuyPlayerTest(WebApiTesterFactory factory)
         {
             _factory = factory;
         }

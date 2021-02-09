@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System;
 using System.Collections.Generic;
-
+using DreamSoccer.Core.Requests;
+using AutoMapper;
+using DreamSoccer.Core.Dtos.TransferList;
 
 namespace DreamSoccerApi.Controllers
 {
@@ -18,17 +20,14 @@ namespace DreamSoccerApi.Controllers
     public class TeamController : SoccerControllerBase
     {
         private readonly ITeamService _teamService;
+        private readonly IMapper _mapper;
 
         public TeamController(ITeamService teamService,
-            IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IMapper mapper) : base(httpContextAccessor)
         {
             _teamService = teamService;
-        }
-        [HttpGet("TestIndex")]
-        [Authorize(Roles = "Team_Owner")]
-        public IActionResult GetIndex()
-        {
-            return Ok();
+            _mapper = mapper;
         }
         #region GetMyPlayers
 
@@ -42,15 +41,40 @@ namespace DreamSoccerApi.Controllers
                 var email = CurrentEmail;
                 var players = await _teamService.GetMyTeamAsync(email);
                 response.Data = players;
-                if (response.Success && players.Any())
+                if (response.Success)
                 {
-                    return Ok(response);
+                    if (players.Any())
+                        return Ok(response);
                 }
-                else
+                response.Success = false;
+                return NotFound(response);
+            }
+            catch (Exception exception)
+            {
+                response.Message = exception.Message;
+                response.Success = false;
+                return BadRequest(response);
+            }
+
+        }
+
+        [HttpPost("GetAllPlayers")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllPlayers(SearchPlayerRequest request)
+        {
+            var response = new ServiceResponse<IEnumerable<PlayerDto>>();
+            try
+            {
+                var email = CurrentEmail;
+                var players = await _teamService.GetAllPlayersAsync(_mapper.Map<SearchPlayerFilter>(request));
+                response.Data = players;
+                if (response.Success)
                 {
-                    response.Success = false;
-                    return NotFound(response);
+                    if (players.Any())
+                        return Ok(response);
                 }
+                response.Success = false;
+                return NotFound(response);
             }
             catch (Exception exception)
             {
@@ -62,7 +86,7 @@ namespace DreamSoccerApi.Controllers
         }
 
         [HttpPost("AddPlayerToMarket")]
-        [Authorize(Roles = "Team_Owner")]
+        [Authorize(Roles = "Team_Owner,Admin")]
         public async Task<IActionResult> AddPlayerToMarketAsycn(AddTransferListRequest request)
         {
             var response = new ServiceResponse<bool>();

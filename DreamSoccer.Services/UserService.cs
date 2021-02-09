@@ -48,14 +48,17 @@ namespace DreamSoccer.Core.Contracts.Services
             {
                 var newUser = _mapper.Map<User>(user);
                 var userId = await _authRepository.RegisterAsync(newUser, password);
-                var team = await _randomRepository.GetRandomTeam();
-                team.Budget = DEFAULT_BUDGET_TEAM;
-                await GeneratePlayers(team, COUNT_GOAL_KEEPERS, Entities.Enums.PositionEnum.Goalkeepers);
-                await GeneratePlayers(team, COUNT_ATTACKERS, Entities.Enums.PositionEnum.Attackers);
-                await GeneratePlayers(team, COUNT_MIDIFIELDERS, Entities.Enums.PositionEnum.Midfielders);
-                await GeneratePlayers(team, COUNT_DEFENDERS, Entities.Enums.PositionEnum.Defenders);
-                await _teamRepository.CreateAsync(team);
-                newUser.Team = team;
+                if (user.Role == RoleEnum.Team_Owner)
+                {
+                    var team = await _randomRepository.GetRandomTeam();
+                    team.Budget = DEFAULT_BUDGET_TEAM;
+                    await GeneratePlayers(team, COUNT_GOAL_KEEPERS, Entities.Enums.PositionEnum.Goalkeepers);
+                    await GeneratePlayers(team, COUNT_ATTACKERS, Entities.Enums.PositionEnum.Attackers);
+                    await GeneratePlayers(team, COUNT_MIDIFIELDERS, Entities.Enums.PositionEnum.Midfielders);
+                    await GeneratePlayers(team, COUNT_DEFENDERS, Entities.Enums.PositionEnum.Defenders);
+                    await _teamRepository.CreateAsync(team);
+                    newUser.Team = team;
+                }
                 await _unitOfWork.SaveChangesAsync();
                 return new ServiceResponse<int>()
                 {

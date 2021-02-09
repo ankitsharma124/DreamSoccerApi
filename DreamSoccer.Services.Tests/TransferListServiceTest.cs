@@ -7,6 +7,7 @@ using DreamSoccer.Core.Contracts.Services;
 using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Repository.Context;
+using DreamSoccer.Repository.Implementations;
 using DreamSoccer.Services.Test.Helpers;
 using Moq;
 using Xunit;

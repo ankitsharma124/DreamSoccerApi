@@ -9,6 +9,6 @@ namespace DreamSoccer.Core.Entities
         public string Country { get; set; }
         public long Budget { get; set; }
         public virtual ICollection<Player> Players { get; set; } = new List<Player>();
-        public User Owner { get; set; }
+        public virtual User Owner { get; set; }
     }
 }

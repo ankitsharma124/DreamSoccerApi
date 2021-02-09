@@ -47,15 +47,13 @@ namespace DreamSoccerApi.Controllers
                 var filter = _mapper.Map<SearchPlayerFilter>(request);
                 var players = await _transferListService.SearchPlayerInMarketAsync(filter);
                 response.Data = players;
-                if (response.Success && players.Any())
+                if (response.Success)
                 {
-                    return Ok(response);
+                    if (players.Any())
+                        return Ok(response);
                 }
-                else
-                {
-                    response.Success = false;
-                    return NotFound(response);
-                }
+                response.Success = false;
+                return NotFound(response);
             }
             catch (Exception exception)
             {
@@ -80,17 +78,17 @@ namespace DreamSoccerApi.Controllers
                 var email = CurrentEmail;
                 var result = await _transferListService.BuyPlayerAsync(request.TrasnferId, email);
 
-                if (response.Success && result != null)
+                if (response.Success)
                 {
-                    response.Data = _mapper.Map<BuyPlayerResultResponse>(result);
-                    return Ok(response);
+                    if (result != null)
+                    {
+                        response.Data = _mapper.Map<BuyPlayerResultResponse>(result);
+                        return Ok(response);
+                    }
                 }
-                else
-                {
-                    response.Success = false;
-                    response.Message = _transferListService.CurrentMessage;
-                    return NotFound(response);
-                }
+                response.Success = false;
+                response.Message = _transferListService.CurrentMessage;
+                return NotFound(response);
             }
             catch (Exception exception)
             {

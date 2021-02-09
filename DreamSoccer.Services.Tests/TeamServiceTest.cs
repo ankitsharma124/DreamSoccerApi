@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Contracts.Services;
+using DreamSoccer.Core.Dtos.TransferList;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Services.Test.Helpers;
 using Moq;
@@ -81,10 +82,42 @@ namespace DreamSoccerApi_Test
             // Assert
             userRepository.Verify(mock => mock.GetAllAsync(), Times.Once());
             playerRepository.Verify(mock => mock.GetPlayerByTeamIdAsync(It.IsAny<int>()), Times.Never());
-            Assert.False(actual.Any());
+            Assert.Null(actual);
         }
         #endregion
+        #region GetAllPlayers
 
+
+        [Theory]
+        [InlineData(250000)]
+        public async Task GetAllPlayersAsync_When_Return_Data(long maxValue)
+        {
+            // Arrange
+            var input = new SearchPlayerFilter
+            {
+                MaxValue = maxValue
+            };
+            var players = new List<Player>();
+            players.Add(new Player()
+            {
+                FirstName = "Jhonatan",
+                Age = 20,
+                Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
+                Country = "UK"
+            });
+            playerRepository.Setup(m =>
+                  m.SearchAsync(It.IsAny<SearchPlayerFilter>())
+                ).Returns(Task.FromResult(players.AsQueryable()));
+
+            // Actual
+            var actual = await service.GetAllPlayersAsync(input);
+
+            // Assert
+            playerRepository.Verify(mock => mock.SearchAsync(It.IsAny<SearchPlayerFilter>()), Times.Once());
+            Assert.True(actual.Any());
+        }
+
+        #endregion
         #region AddPlayerToMarket
 
         [Theory]

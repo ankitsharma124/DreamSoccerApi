@@ -19,6 +19,6 @@ namespace DreamSoccerApi.Controllers
             {
                 return _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(n => n.Type == ClaimTypes.Name).Value;
             }
-        }
+        }        
     }
 }

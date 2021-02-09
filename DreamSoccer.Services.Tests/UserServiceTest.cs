@@ -7,6 +7,7 @@ using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
 using DreamSoccer.Core.Responses;
 using DreamSoccer.Repository.Context;
+using DreamSoccer.Repository.Implementations;
 using DreamSoccer.Services.Test.Helpers;
 using Moq;
 using Xunit;
@@ -63,7 +64,7 @@ namespace DreamSoccerApi_Test
         }
 
         [Theory]
-        [InlineData("test1@email.com", RoleEnum.Admin, "")]
+        [InlineData("test1@email.com", RoleEnum.Team_Owner, "")]
         public async Task Register_When_Data_Valid(string email, RoleEnum role, string password)
         {
             // Arrange
