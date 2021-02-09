@@ -48,13 +48,13 @@ namespace DreamSoccer.Core.Contracts.Services
 
         }
 
-        public async Task<bool> AddPlayerToMarketAsync(string owner, int playerId, long price)
+        public async Task<int> AddPlayerToMarketAsync(string owner, int playerId, long price)
         {
             var user = await _userRepository.GetByEmailAsync(owner);
             if (user == null)
             {
                 CurrentMessage = "User doesn't exist";
-                return false;
+                return -1;
             }
             var player = await _playerRepository.GetByIdAsync(playerId);
 
@@ -62,18 +62,19 @@ namespace DreamSoccer.Core.Contracts.Services
 
                 if (player.Team.Owner.Email == user.Email || _currentUserRepository.Role == RoleEnum.Admin)
                 {
-                    if (await _transferListRepository.CheckPlayerExistAsync(player.Id))
+                    var transferListPlayer = await _transferListRepository.CheckPlayerExistAsync(player.Id);
+                    if (transferListPlayer != null)
                     {
                         CurrentMessage = "Player Exist in transfer List";
-                        return false;
+                        return transferListPlayer.Id;
                     }
                     var model = new TransferList() { PlayerId = player.Id, Value = price };
-                    await _transferListRepository.CreateAsync(model);
+                    model = await _transferListRepository.CreateAsync(model);
                     await _unitOfWork.SaveChangesAsync();
-                    return true;
+                    return model.Id;
                 }
             CurrentMessage = "Player not in our Team";
-            return false;
+            return -1;
         }
 
 

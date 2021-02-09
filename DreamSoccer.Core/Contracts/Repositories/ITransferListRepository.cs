@@ -8,6 +8,6 @@ namespace DreamSoccer.Core.Contracts.Repositories
     public interface ITransferListRepository : IBaseRepository<int, TransferList>
     {
         Task<IQueryable<TransferList>> SearchPlayerAsync(SearchPlayerFilter input);
-        Task<bool> CheckPlayerExistAsync(int playerId);
+        Task<TransferList> CheckPlayerExistAsync(int playerId);
     }
 }

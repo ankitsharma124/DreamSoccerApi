@@ -15,9 +15,9 @@ namespace DreamSoccer.Repository.Implementations
         {
         }
 
-        public async Task<bool> CheckPlayerExistAsync(int playerId)
+        public async Task<TransferList> CheckPlayerExistAsync(int playerId)
         {
-            return (await GetAllAsync()).Any(n => n.PlayerId == playerId && n.DelFlag == false);
+            return (await GetAllAsync()).FirstOrDefault(n => n.PlayerId == playerId && n.DelFlag == false);
         }
 
         public override async Task<TransferList> GetByIdAsync(int id)
@@ -30,6 +30,7 @@ namespace DreamSoccer.Repository.Implementations
             var query = await GetAllAsync();
             query = query
                 .Include(n => n.Player).ThenInclude(n => n.Team)
+                .Where(n => !n.DelFlag && !n.Player.DelFlag)
                 .WhereIf(!string.IsNullOrEmpty(input.Country), n => n.Player.Country.Contains(input.Country))
                 .WhereIf(!string.IsNullOrEmpty(input.PlayerName), n => n.Player.FirstName.Contains(input.PlayerName) || n.Player.LastName.Contains(input.PlayerName) || (n.Player.FirstName + ' ' + n.Player.LastName).Contains(input.PlayerName))
                 .WhereIf(!string.IsNullOrEmpty(input.TeamName), n => n.Player.Team.TeamName.Contains(input.TeamName))

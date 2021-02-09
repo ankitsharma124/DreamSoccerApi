@@ -125,13 +125,13 @@ namespace DreamSoccerApi.Controllers
         [Authorize(Roles = "Team_Owner,Admin")]
         public async Task<IActionResult> AddPlayerToMarketAsycn(AddTransferListRequest request)
         {
-            var response = new ServiceResponse<bool>();
+            var response = new ServiceResponse<int>();
             try
             {
                 var email = CurrentEmail;
                 var result = await _teamService.AddPlayerToMarketAsync(email, request.PlayerId, request.Price);
                 response.Data = result;
-                if (response.Success && result)
+                if (response.Success && result != -1)
                 {
                     return Ok(response);
                 }
@@ -185,11 +185,15 @@ namespace DreamSoccerApi.Controllers
 
         [HttpDelete("DeletePlayer")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeletePlayerAsync(PlayerReqeust request)
+        public async Task<IActionResult> DeletePlayerAsync(int id)
         {
             var response = new ServiceResponse<PlayerDto>();
             try
             {
+                var request = new PlayerReqeust()
+                {
+                    Id = id
+                };
                 var email = CurrentEmail;
                 var result = await _teamService.DeletePlayerAsync(_mapper.Map<PlayerDto>(request));
                 response.Data = result;

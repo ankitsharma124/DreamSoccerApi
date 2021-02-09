@@ -156,7 +156,7 @@ namespace DreamSoccerApi_Test
                 PlayerId = playerId
             };
             httpContextAccessor.CreateUserLogin(userId);
-            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(true));
+            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(1));
             // Actual
             // Actual
             var actual = await controller.AddPlayerToMarketAsycn(request);
@@ -178,7 +178,7 @@ namespace DreamSoccerApi_Test
                 PlayerId = playerId
             };
             httpContextAccessor.CreateUserLogin(userId);
-            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(false));
+            teamService.Setup(_ => _.AddPlayerToMarketAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<long>())).Returns(Task.FromResult(-1));
             // Actual
             // Actual
             var actual = await controller.AddPlayerToMarketAsycn(request);
@@ -561,7 +561,7 @@ namespace DreamSoccerApi_Test
             teamService.Setup(_ => _.DeletePlayerAsync(It.IsAny<PlayerDto>())).Returns(Task.FromResult(player));
             // Actual
             // Actual
-            var actual = await controller.DeletePlayerAsync(request);
+            var actual = await controller.DeletePlayerAsync(request.Id);
 
             // Assert
             Assert.Equal(typeof(OkObjectResult), actual.GetType());
@@ -589,7 +589,7 @@ namespace DreamSoccerApi_Test
             teamService.Setup(_ => _.DeletePlayerAsync(It.IsAny<PlayerDto>())).Returns(Task.FromResult<PlayerDto>(null));
             // Actual
             // Actual
-            var actual = await controller.DeletePlayerAsync(request);
+            var actual = await controller.DeletePlayerAsync(request.Id);
 
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());
@@ -616,7 +616,7 @@ namespace DreamSoccerApi_Test
             teamService.Setup(_ => _.DeletePlayerAsync(It.IsAny<PlayerDto>())).Throws(new ArgumentException("Connection Timeout"));
             // Actual
             // Actual
-            var actual = await controller.DeletePlayerAsync(request);
+            var actual = await controller.DeletePlayerAsync(request.Id);
 
             // Assert
             Assert.Equal(typeof(BadRequestObjectResult), actual.GetType());

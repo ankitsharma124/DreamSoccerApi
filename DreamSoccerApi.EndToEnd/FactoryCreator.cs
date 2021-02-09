@@ -15,11 +15,11 @@ namespace DreamSoccerApi.E2E
                 .RuleFor(u => u.Email, (f, u) => f.Internet.Email())
                 .RuleFor(u => u.Password, (f, u) => f.Internet.Password(5));
         }
-        public static UserRegisterDto CreateUser()
+        public static UserRegisterDto CreateUser(RoleEnum role = RoleEnum.Team_Owner)
         {
             var user = _fakeUserRegister.Generate();
             user.Email = user.Email.Replace("@", $"{DateTime.Now.Second.ToString()}@");
-            user.Role = RoleEnum.Team_Owner;
+            user.Role = role;
             return user;
         }
     }

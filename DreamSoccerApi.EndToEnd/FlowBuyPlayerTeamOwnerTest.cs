@@ -1,4 +1,5 @@
 using DreamSoccer.Core.Dtos.User;
+using DreamSoccer.Core.Entities;
 using DreamSoccer.Core.Requests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,12 +13,12 @@ using Xunit;
 
 namespace DreamSoccerApi.E2E
 {
-    public class FlowBuyPlayerTest : IClassFixture<WebApiTesterFactory>
+    public partial class FlowBuyPlayerTeamOwnerTest : IClassFixture<WebApiTesterFactory>
     {
         const int TOTAL_PLAYER = 20;
         private readonly WebApiTesterFactory _factory;
 
-        public FlowBuyPlayerTest(WebApiTesterFactory factory)
+        public FlowBuyPlayerTeamOwnerTest(WebApiTesterFactory factory)
         {
             _factory = factory;
         }
@@ -65,12 +66,14 @@ namespace DreamSoccerApi.E2E
 
         }
 
-        private async Task<KeyValuePair<string, JObject>> Post_Buy_Player_Async(HttpClient client, int trasnferId)
+        private async Task<KeyValuePair<string, JObject>> Post_Buy_Player_Async(HttpClient client, int trasnferId, int targetTeam = -1)
         {
             // Arrange
             var createFakeUser = new BuyPlayerRequest()
             {
-                TransferId = trasnferId
+                TransferId = trasnferId,
+                TeamId = targetTeam
+
             };
             var content = new StringContent(JsonConvert.SerializeObject(createFakeUser), Encoding.UTF8, "application/json");
             // Act
@@ -118,7 +121,7 @@ namespace DreamSoccerApi.E2E
             response.EnsureSuccessStatusCode(); // Status Code 200-299
             var result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync()) as JObject;
             Assert.True(Convert.ToBoolean(result["success"].ToString()));
-            Assert.True(Convert.ToBoolean(result["data"].ToString()));
+            Assert.True(Convert.ToInt32(result["data"].ToString()) > 0);
             Assert.Null(result["message"].Value<string>());
             return new KeyValuePair<AddTransferListRequest, JObject>(player, result);
         }
@@ -156,10 +159,10 @@ namespace DreamSoccerApi.E2E
             return new KeyValuePair<UserLoginDto, JObject>(createFakeUser, result);
         }
 
-        private static async Task<KeyValuePair<UserRegisterDto, JObject>> Post_Register_User(HttpClient client)
+        private static async Task<KeyValuePair<UserRegisterDto, JObject>> Post_Register_User(HttpClient client, RoleEnum role = RoleEnum.Team_Owner)
         {
             // Arrange
-            var createFakeUser = FactoryCreator.CreateUser();
+            var createFakeUser = FactoryCreator.CreateUser(role);
             var content = new StringContent(JsonConvert.SerializeObject(createFakeUser), Encoding.UTF8, "application/json");
             // Act
             var response = await client.PostAsync(Constants.URL_REGISTRATION, content);
