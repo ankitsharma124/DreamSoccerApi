@@ -63,7 +63,7 @@ namespace DreamSoccerApi.E2E
         public async Task RegisterAdmin_Login_UpdateTeam_UpdatePlayer_UpdatePlayer()
         {
             var client = _factory.CreateClient();
-
+            var buyerUser = await Post_Register_User(client);
             var user = await Post_Register_User(client, RoleEnum.Admin);
             var userLogin = await Post_Login_User(client, user.Key);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
@@ -71,9 +71,10 @@ namespace DreamSoccerApi.E2E
             var searchAllTeam = await Post_Search_All_Team(client);
             await Post_Update_Team(client, searchAllTeam.Value["data"][0], false);
             await Post_Update_Team(client, searchAllTeam.Value["data"][0], false);
-            var playerWillBeUpdate = (searchAllTeam.Value["data"][0]["players"] as JArray)[0];
-            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(searchAllTeam.Value["data"][0]["id"]));
-            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(searchAllTeam.Value["data"][0]["id"]));
+            var team = searchAllTeam.Value["data"].Where(m => (m["players"] as JArray).Count > 0).First();
+            var playerWillBeUpdate = (team["players"] as JArray)[0];
+            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(team["id"]));
+            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(team["id"]));
 
         }
 
@@ -95,7 +96,7 @@ namespace DreamSoccerApi.E2E
         public async Task RegisterUser_Until_OtherUserBuyPlayer()
         {
             var client = _factory.CreateClient();
-            
+
             var user = await Post_Register_User(client);
             var userLogin = await Post_Login_User(client, user.Key);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
