@@ -72,7 +72,7 @@ namespace DreamSoccer.Core.Contracts.Services
                     return null;
                 }
                 var currentPlayer = player.Player;
-                var previosTeam = await _teamRepository.GetByIdAsync(currentPlayer.TeamId);
+                var previosTeam = await _teamRepository.GetByIdAsync(currentPlayer.PreviousTeam);
                 var valueIncrease = await _randomRepository.GetRandomRatioForIncreaseValue();
                 currentPlayer.Value = currentPlayer.Value + (valueIncrease * currentPlayer.Value / 100);
                 previosTeam.Budget = previosTeam.Budget + player.Value;

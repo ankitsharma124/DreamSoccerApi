@@ -69,6 +69,9 @@ namespace DreamSoccer.Core.Contracts.Services
                         return transferListPlayer.Id;
                     }
                     var model = new TransferList() { PlayerId = player.Id, Value = price };
+                    player.PreviousTeam = player.TeamId.Value;
+                    player.TeamId = null;
+                    await _playerRepository.UpdateAsync(player.Id, player);
                     model = await _transferListRepository.CreateAsync(model);
                     await _unitOfWork.SaveChangesAsync();
                     return model.Id;

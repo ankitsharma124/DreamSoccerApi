@@ -140,6 +140,7 @@ namespace DreamSoccerApi_Test
                 Age = 20,
                 Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
                 Country = "UK",
+                TeamId =1,
                 Team = new Team()
                 {
                     TeamName = "Team 1",
@@ -161,6 +162,7 @@ namespace DreamSoccerApi_Test
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(),It.IsAny<Player>()), Times.Once());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
             transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Once());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Once());
@@ -200,6 +202,7 @@ namespace DreamSoccerApi_Test
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
             transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Once());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
@@ -237,6 +240,7 @@ namespace DreamSoccerApi_Test
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
             transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Never());
@@ -259,6 +263,7 @@ namespace DreamSoccerApi_Test
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Never());
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
             transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Never());
             Assert.False(actual > 0);

@@ -1,0 +1,1 @@
+Update "Players" set "PreviousTeam"="TeamId" where "TeamId" is not null and  "Id" in (Select "PlayerId" from "TransferList")

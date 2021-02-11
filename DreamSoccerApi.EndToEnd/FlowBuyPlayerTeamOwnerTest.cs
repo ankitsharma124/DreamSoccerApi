@@ -80,7 +80,7 @@ namespace DreamSoccerApi.E2E
             var response = await client.PostAsync(Constants.URL_POST_BUY_PLAYER_IN_MARKET, content);
 
             // Assert
-            response.EnsureSuccessStatusCode(); // Status Code 200-299
+                response.EnsureSuccessStatusCode(); // Status Code 200-299
             var result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync()) as JObject;
             Assert.True(Convert.ToBoolean(result["success"].ToString()));
             Assert.True(!string.IsNullOrEmpty(result["data"].ToString()));
