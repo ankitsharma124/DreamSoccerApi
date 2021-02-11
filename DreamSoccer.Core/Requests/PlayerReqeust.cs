@@ -10,7 +10,7 @@ namespace DreamSoccer.Core.Dtos.User
         public string Country { get; set; }
         public int Age { get; set; }
         public long Value { get; set; }
-        public int TeamId { get; set; }
+        public int? TeamId { get; set; }
         public PositionEnum Position { get; set; }
     }
 

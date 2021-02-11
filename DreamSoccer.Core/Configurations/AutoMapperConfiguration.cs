@@ -27,6 +27,8 @@ namespace DreamSoccer.Core.Configurations
             CreateMap<Player, PlayersInformationDto>().ReverseMap();
             CreateMap<Team, TeamDto>()
             .ReverseMap();
+            CreateMap<TeamInput, TeamDto>()
+            .ReverseMap(); 
             CreateMap<Team, TeamDto>().ForMember(dest => dest.TeamValue, opt => opt.MapFrom(m => m.Players.Sum(i => i.Value)));
 
             CreateMap<Team, TeamInformationDto>()
@@ -40,6 +42,8 @@ namespace DreamSoccer.Core.Configurations
 
             CreateMap<PlayerReqeust, PlayerDto>().ReverseMap();
             CreateMap<TeamReqeust, TeamDto>().ReverseMap();
+            CreateMap<PlayerDto, PlayerResponse>().ReverseMap();
+            
 
         }
     }

@@ -13,12 +13,11 @@ namespace DreamSoccer.Repository.Context
             builder.ToTable("TransferList");
             builder.HasOne<Player>(c => c.Player)
                .WithOne(c => c.TransferList)
-               .HasForeignKey<Player>(c => c.TransferListId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .HasForeignKey<TransferList>(c => c.Id);
             builder.HasOne(c => c.Player)
                .WithOne(c => c.TransferList)
-               .HasForeignKey<TransferList>(c => c.PlayerId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .HasForeignKey<TransferList>(c => c.PlayerId);
+            builder.HasIndex(n => n.PlayerId).IsUnique(false);
         }
     }
 }

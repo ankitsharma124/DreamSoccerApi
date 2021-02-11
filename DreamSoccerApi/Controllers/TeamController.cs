@@ -130,17 +130,18 @@ namespace DreamSoccerApi.Controllers
             {
                 var email = CurrentEmail;
                 var result = await _teamService.AddPlayerToMarketAsync(email, request.PlayerId, request.Price);
-                response.Data = result;
-                if (response.Success && result != -1)
+
+                if (response.Success)
                 {
-                    return Ok(response);
+                    if (result != -1)
+                    {
+                        response.Data = result;
+                        return Ok(response);
+                    }
                 }
-                else
-                {
-                    response.Success = false;
-                    response.Message = _teamService.CurrentMessage;
-                    return BadRequest(response);
-                }
+                response.Success = false;
+                response.Message = _teamService.CurrentMessage;
+                return BadRequest(response);
             }
             catch (Exception exception)
             {
@@ -156,17 +157,16 @@ namespace DreamSoccerApi.Controllers
         [Authorize(Roles = "Team_Owner,Admin")]
         public async Task<IActionResult> UpdatePlayerAsync(PlayerReqeust request)
         {
-            var response = new ServiceResponse<PlayerDto>();
+            var response = new ServiceResponse<PlayerResponse>();
             try
             {
                 var email = CurrentEmail;
                 var result = await _teamService.UpdatePlayerAsync(_mapper.Map<PlayerDto>(request));
-                response.Data = result;
                 if (response.Success)
                 {
                     if (result != null)
                     {
-                        response.Data = result;
+                        response.Data = _mapper.Map<PlayerResponse>(result);
                         return Ok(response);
                     }
                 }

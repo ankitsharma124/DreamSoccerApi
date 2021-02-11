@@ -6,6 +6,7 @@ using DreamSoccer.Core.Contracts.Repositories;
 using DreamSoccer.Core.Dtos.Players;
 using DreamSoccer.Core.Dtos.Teams;
 using DreamSoccer.Core.Dtos.TransferList;
+using DreamSoccer.Core.Dtos.User;
 using DreamSoccer.Core.Entities;
 
 namespace DreamSoccer.Core.Contracts.Services
@@ -59,15 +60,15 @@ namespace DreamSoccer.Core.Contracts.Services
             var player = await _playerRepository.GetByIdAsync(playerId);
 
             if (player != null)
-
+            {
+                var currentPlayerInTransferList = await CheckInTransferList(player);
+                if (player.Team == null && currentPlayerInTransferList != null)
+                {
+                    CurrentMessage = "Player Exist in transfer List";
+                    return -1;
+                }
                 if (player.Team.Owner.Email == user.Email || _currentUserRepository.Role == RoleEnum.Admin)
                 {
-                    var transferListPlayer = await _transferListRepository.CheckPlayerExistAsync(player.Id);
-                    if (transferListPlayer != null)
-                    {
-                        CurrentMessage = "Player Exist in transfer List";
-                        return transferListPlayer.Id;
-                    }
                     var model = new TransferList() { PlayerId = player.Id, Value = price };
                     player.PreviousTeam = player.TeamId.Value;
                     player.TeamId = null;
@@ -76,10 +77,20 @@ namespace DreamSoccer.Core.Contracts.Services
                     await _unitOfWork.SaveChangesAsync();
                     return model.Id;
                 }
+            }
             CurrentMessage = "Player not in our Team";
             return -1;
         }
 
+        private async Task<TransferList> CheckInTransferList(Player player)
+        {
+            var transferListPlayer = await _transferListRepository.CheckPlayerExistAsync(player.Id);
+            if (transferListPlayer != null)
+            {
+                return transferListPlayer;
+            }
+            return null;
+        }
 
 
         public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(SearchPlayerFilter input)
@@ -96,6 +107,7 @@ namespace DreamSoccer.Core.Contracts.Services
 
         public async Task<TeamDto> UpdateTeamAsync(TeamDto team)
         {
+            var currentTeam = await _teamRepository.GetByIdAsync(team.Id);
             if (_currentUserRepository.Role == RoleEnum.Team_Owner)
             {
                 var user = await _userRepository.GetByEmailAsync(_currentUserRepository.Email);
@@ -110,7 +122,11 @@ namespace DreamSoccer.Core.Contracts.Services
                     return null;
                 }
             }
-            var currentTeam = _mapper.Map<Team>(team);
+            var input = _mapper.Map<TeamInput>(team);
+            input.Owner = _mapper.Map<UserOwnerDto>(currentTeam.Owner);
+            input.Players = _mapper.Map<List<PlayerDto>>(currentTeam.Players);
+
+            currentTeam = _mapper.Map<TeamInput, Team>(input, currentTeam);
             await _teamRepository.UpdateAsync(team.Id, currentTeam);
             await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<TeamDto>(currentTeam);
@@ -118,22 +134,26 @@ namespace DreamSoccer.Core.Contracts.Services
 
         public async Task<PlayerDto> UpdatePlayerAsync(PlayerDto player)
         {
+            var currentPlayer = await _playerRepository.GetByIdAsync(player.Id);
             if (_currentUserRepository.Role == RoleEnum.Team_Owner)
             {
                 var user = await _userRepository.GetByEmailAsync(_currentUserRepository.Email);
-                if (player.TeamId != user.TeamId)
+                if (currentPlayer.TeamId != user.TeamId)
                 {
                     CurrentMessage = "Player not in your team";
                     return null;
                 }
-                var currentPlayer = await _playerRepository.GetByIdAsync(player.Id);
+
                 if (currentPlayer.Value != player.Value)
                 {
                     CurrentMessage = "You can't change value";
                     return null;
                 }
             }
-            player = _mapper.Map<PlayerDto>(await _playerRepository.UpdateAsync(player.Id, _mapper.Map<Player>(player)));
+            player.PreviousTeam = currentPlayer.PreviousTeam;
+            player.TeamId = currentPlayer.TeamId;
+            player.Team = _mapper.Map<TeamDto>(currentPlayer.Team);
+            player = _mapper.Map<PlayerDto>(await _playerRepository.UpdateAsync(player.Id, _mapper.Map<PlayerDto, Player>(player, currentPlayer)));
             await _unitOfWork.SaveChangesAsync();
             return player;
         }

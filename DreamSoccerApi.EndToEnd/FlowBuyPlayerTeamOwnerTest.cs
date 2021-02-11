@@ -22,6 +22,60 @@ namespace DreamSoccerApi.E2E
         {
             _factory = factory;
         }
+        /// <summary>
+        /// -> Register User 
+        /// -> User Login 
+        /// -> Get My Players 
+        /// -> Update Team
+        /// -> Update Team
+        /// -> Update Player
+        /// -> Update Player
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task RegisterUser_Login_UpdateTeam_UpdatePlayer_UpdatePlayer()
+        {
+            var client = _factory.CreateClient();
+
+            var user = await Post_Register_User(client);
+            var userLogin = await Post_Login_User(client, user.Key);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
+
+            var teamPlayer = await Get_My_Team_Players(client);
+            await Post_Update_Team(client, teamPlayer.Value["data"], false);
+            await Post_Update_Team(client, teamPlayer.Value["data"], false);
+            var playerWillBeUpdate = (teamPlayer.Value["data"]["players"] as JArray)[0];
+            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(teamPlayer.Value["data"]["id"]));
+            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(teamPlayer.Value["data"]["id"]));
+
+        }
+        /// <summary>
+        /// -> Register Admin 
+        /// -> User Login 
+        /// -> Get My Players 
+        /// -> Update Team
+        /// -> Update Team
+        /// -> Update Player
+        /// -> Update Player
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task RegisterAdmin_Login_UpdateTeam_UpdatePlayer_UpdatePlayer()
+        {
+            var client = _factory.CreateClient();
+
+            var user = await Post_Register_User(client, RoleEnum.Admin);
+            var userLogin = await Post_Login_User(client, user.Key);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
+
+            var searchAllTeam = await Post_Search_All_Team(client);
+            await Post_Update_Team(client, searchAllTeam.Value["data"][0], false);
+            await Post_Update_Team(client, searchAllTeam.Value["data"][0], false);
+            var playerWillBeUpdate = (searchAllTeam.Value["data"][0]["players"] as JArray)[0];
+            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(searchAllTeam.Value["data"][0]["id"]));
+            await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(searchAllTeam.Value["data"][0]["id"]));
+
+        }
 
 
         /// <summary>
@@ -41,14 +95,20 @@ namespace DreamSoccerApi.E2E
         public async Task RegisterUser_Until_OtherUserBuyPlayer()
         {
             var client = _factory.CreateClient();
-
+            
             var user = await Post_Register_User(client);
             var userLogin = await Post_Login_User(client, user.Key);
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
 
             var teamPlayer = await Get_My_Team_Players(client);
+            var updateTeam = await Post_Update_Team(client, teamPlayer.Value["data"], false);
+            var updateTeamMakeSureWeCanUpdateAgain = await Post_Update_Team(client, teamPlayer.Value["data"], false);
+            var playerWillBeUpdate = (teamPlayer.Value["data"]["players"] as JArray)[0];
+            var updatePlayer = await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(teamPlayer.Value["data"]["id"]));
+            var updatePlayerMakeSureWeCanUpdateAgain = await Post_Update_Player(client, playerWillBeUpdate, Convert.ToInt32(teamPlayer.Value["data"]["id"]));
             var playerId = Convert.ToInt32((teamPlayer.Value["data"]["players"] as JArray)[0]["id"]);
             var playerForSale = await Post_Add_Player_To_Market(client, playerId, 1500000);
+
 
             var buyerUser = await Post_Register_User(client);
             var buyerUserLogin = await Post_Login_User(client, buyerUser.Key);
@@ -61,7 +121,9 @@ namespace DreamSoccerApi.E2E
             var buyerBuyPlayer = await Post_Buy_Player_Async(client, trasnferId);
             var buyerGetLatestTeamPlayer = await Get_My_Team_Players(client, TOTAL_PLAYER + 1);
             var countPlayerAfterBuy = (buyerGetLatestTeamPlayer.Value["data"]["players"] as JArray).Count();
-            Assert.Equal(playerForSale.Key.PlayerId, playerId);
+            playerId = Convert.ToInt32(buyerSearchPlayer.Value["data"][0]["player"]["id"].ToString());
+            var playerForSaleFromBuyer = await Post_Add_Player_To_Market(client, playerId, 2500000);
+            Assert.Equal(playerForSaleFromBuyer.Key.PlayerId, playerId);
             Assert.Equal<int>(countPlayerAfterBuy, countPlayerBeforeBuy + 1);
 
         }
@@ -80,7 +142,7 @@ namespace DreamSoccerApi.E2E
             var response = await client.PostAsync(Constants.URL_POST_BUY_PLAYER_IN_MARKET, content);
 
             // Assert
-                response.EnsureSuccessStatusCode(); // Status Code 200-299
+            response.EnsureSuccessStatusCode(); // Status Code 200-299
             var result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync()) as JObject;
             Assert.True(Convert.ToBoolean(result["success"].ToString()));
             Assert.True(!string.IsNullOrEmpty(result["data"].ToString()));

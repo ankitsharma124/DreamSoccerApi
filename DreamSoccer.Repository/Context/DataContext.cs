@@ -28,6 +28,7 @@ namespace DreamSoccer.Repository.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(Configuration.GetConnectionString("DefaultConnectionString"));
+            //optionsBuilder.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString"));
             base.OnConfiguring(optionsBuilder);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

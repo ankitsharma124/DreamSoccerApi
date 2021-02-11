@@ -66,7 +66,7 @@ namespace DreamSoccer.Core.Contracts.Services
             }
             if (team.Budget >= player.Value)
             {
-                if (team.Id == player.Player.TeamId)
+                if (team.Id == player.Player.PreviousTeam)
                 {
                     CurrentMessage = "This player in your team";
                     return null;

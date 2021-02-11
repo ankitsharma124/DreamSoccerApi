@@ -168,7 +168,8 @@ namespace DreamSoccerApi_Test
                     Id = 1,
                     FirstName = "Jhonatan",
                     LastName = "Christian",
-                    TeamId = 1
+                    TeamId = 1,
+                    PreviousTeam=1
                 }
 
             };

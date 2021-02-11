@@ -44,11 +44,12 @@ namespace DreamSoccerApi.E2E
             var updateTeam = await Post_Update_Team(client, team);
             var updateBudget = await Post_Update_Team(client, teamWillBuyPlayer);
             var searchAllPlayer = await Post_Search_All_Player(client);
-
-            var playerWillBeDelete = (searchAllPlayer.Value["data"] as JArray)[0];
-            var playerWillBeUpdate = (searchAllPlayer.Value["data"] as JArray)[1];
-            var playerWillAddToMarket = (searchAllPlayer.Value["data"] as JArray).FirstOrDefault(n => n["teamId"].ToString() != teamWillBuyPlayer["id"].ToString());
-            var playerWillAddToMarketAgain = (searchAllPlayer.Value["data"] as JArray)[3];
+            var resultSearchPlayer = (searchAllPlayer.Value["data"] as JArray).Where(n => n["teamId"].Value<string>() != null).ToArray();
+            var resultSearchPlayerNotSameTeam = (searchAllPlayer.Value["data"] as JArray).Where(n => n["teamId"].Value<string>() != null && n["teamId"].ToString() != teamWillBuyPlayer["id"].ToString()).ToArray();
+            var playerWillBeDelete = resultSearchPlayer[0];
+            var playerWillBeUpdate = resultSearchPlayer[1];
+            var playerWillAddToMarket = resultSearchPlayerNotSameTeam[0];
+            var playerWillAddToMarketAgain = resultSearchPlayerNotSameTeam[1];
             var updatePlayer = await Post_Update_Player(client, playerWillBeUpdate);
 
 
@@ -60,10 +61,10 @@ namespace DreamSoccerApi.E2E
 
         }
 
-        private async Task<KeyValuePair<PlayerReqeust, JObject>> Post_Update_Player(HttpClient client, JToken playerWillBeUpdate)
+        private async Task<KeyValuePair<PlayerReqeust, JObject>> Post_Update_Player(HttpClient client, JToken playerWillBeUpdate, int teamId = -1)
         {
             // Arrange
-            var newAge = 67;
+            var newAge = 37;
             var filter = new PlayerReqeust()//Get all Team
             {
                 Id = Convert.ToInt32(playerWillBeUpdate["id"].ToString()),
@@ -72,7 +73,7 @@ namespace DreamSoccerApi.E2E
                 FirstName = playerWillBeUpdate["firstName"].ToString(),
                 LastName = playerWillBeUpdate["lastName"].ToString(),
                 Position = (PositionEnum)Enum.Parse(typeof(PositionEnum), playerWillBeUpdate["position"].ToString()),
-                TeamId = Convert.ToInt32(playerWillBeUpdate["teamId"].ToString()),
+                TeamId = teamId == -1 ? Convert.ToInt32(playerWillBeUpdate["teamId"].ToString()) : teamId,
                 Value = Convert.ToInt32(playerWillBeUpdate["value"].ToString())
 
             };
@@ -136,14 +137,14 @@ namespace DreamSoccerApi.E2E
             return new KeyValuePair<SearchPlayerRequest, JObject>(filter, result);
         }
 
-        private async Task<KeyValuePair<TeamReqeust, JObject>> Post_Update_Team(HttpClient client, JToken team)
+        private async Task<KeyValuePair<TeamReqeust, JObject>> Post_Update_Team(HttpClient client, JToken team, bool isChangeBudget = true)
         {
             // Arrange
             var newName = "Dream Team";
             var filter = new TeamReqeust()//Get all Team
             {
                 TeamName = newName,
-                Budget = 500000000,
+                Budget = isChangeBudget ? 500000000 : Convert.ToInt32(team["budget"].ToString()),
                 Id = Convert.ToInt32(team["id"].ToString()),
                 Country = team["country"].ToString(),
             };

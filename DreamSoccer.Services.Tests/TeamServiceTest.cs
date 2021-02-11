@@ -140,7 +140,7 @@ namespace DreamSoccerApi_Test
                 Age = 20,
                 Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
                 Country = "UK",
-                TeamId =1,
+                TeamId = 1,
                 Team = new Team()
                 {
                     TeamName = "Team 1",
@@ -162,7 +162,7 @@ namespace DreamSoccerApi_Test
             // Assert
             playerRepository.Verify(mock => mock.GetByIdAsync(It.IsAny<int>()), Times.Once());
             userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
-            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(),It.IsAny<Player>()), Times.Once());
+            playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Once());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Once());
             transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Once());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Once());
@@ -182,11 +182,6 @@ namespace DreamSoccerApi_Test
                 Age = 20,
                 Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
                 Country = "UK",
-                Team = new Team()
-                {
-                    TeamName = "Team 1",
-                    Owner = user
-                }
             };
             playerRepository.Setup(m =>
                   m.GetByIdAsync(It.IsAny<int>())
@@ -243,7 +238,7 @@ namespace DreamSoccerApi_Test
             playerRepository.Verify(mock => mock.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>()), Times.Never());
             unitOfWork.Verify(mock => mock.SaveChangesAsync(), Times.Never());
             transferListRepository.Verify(mock => mock.CreateAsync(It.IsAny<TransferList>()), Times.Never());
-            transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Never());
+            transferListRepository.Verify(mock => mock.CheckPlayerExistAsync(It.IsAny<int>()), Times.Once());
             Assert.False(actual > 0);
             Assert.Equal("Player not in our Team", service.CurrentMessage);
         }
@@ -334,7 +329,14 @@ namespace DreamSoccerApi_Test
                 Country = country,
                 Budget = budget
             };
-
+            var team = new Team
+            {
+                Id = teamId,
+                TeamName = teamName,
+                Country = country,
+                Budget = budget
+            };
+            teamRepository.Setup(mock => mock.GetByIdAsync(It.IsAny<int>())).Returns(Task.FromResult(team));
             currentUserRepository.Setup(n => n.Role).Returns(role);
             userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
             {
@@ -439,7 +441,8 @@ namespace DreamSoccerApi_Test
             };
             playerRepository.Setup(n => n.GetByIdAsync(It.IsAny<int>())).Returns(Task.FromResult(new Player()
             {
-                Value = 200000
+                Value = 200000,
+                TeamId = 2
             }));
             currentUserRepository.Setup(n => n.Role).Returns(role);
             userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
@@ -496,7 +499,15 @@ namespace DreamSoccerApi_Test
                 TeamId = 2
 
             };
+            var player = new Player
+            {
+                Id = playerId,
+                FirstName = firstName,
+                LastName = lastName,
+                Value = value,
+                TeamId = 2
 
+            };
             currentUserRepository.Setup(n => n.Role).Returns(role);
             userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(new User()
             {
@@ -504,6 +515,9 @@ namespace DreamSoccerApi_Test
                 Role = role,
                 TeamId = 1
             }));
+            playerRepository.Setup(m =>
+                 m.GetByIdAsync(It.IsAny<int>())
+               ).Returns(Task.FromResult(player));
             playerRepository.Setup(m =>
                   m.UpdateAsync(It.IsAny<int>(), It.IsAny<Player>())
                 );

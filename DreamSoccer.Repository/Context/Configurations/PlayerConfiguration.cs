@@ -14,8 +14,8 @@ namespace DreamSoccer.Repository.Context
                .WithMany(c => c.Players)
                .HasForeignKey(c => c.TeamId)
                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(n => n.TransferListId).IsUnique(false);
 
-          
         }
     }
 }

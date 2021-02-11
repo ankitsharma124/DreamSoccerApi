@@ -1,11 +1,11 @@
-﻿using DreamSoccer.Core.Dtos;
-using DreamSoccer.Core.Dtos.Players;
+﻿using DreamSoccer.Core.Dtos.Players;
 using DreamSoccer.Core.Entities.Enums;
 
-namespace DreamSoccer.Core.Entities
+namespace DreamSoccer.Core.Responses
 {
-    public class PlayerDto : BaseEntityDto
+    public class PlayerResponse
     {
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Country { get; set; }
@@ -13,7 +13,6 @@ namespace DreamSoccer.Core.Entities
         public long Value { get; set; }
         public TeamDto Team { get; set; }
         public int? TeamId { get; set; }
-        public int PreviousTeam { get; set; }
         public PositionEnum Position { get; set; }
     }
 }
