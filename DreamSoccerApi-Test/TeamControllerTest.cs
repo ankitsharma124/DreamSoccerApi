@@ -229,7 +229,7 @@ namespace DreamSoccerApi_Test
 
             // Assert
             Assert.True(actualAttribute.Any());
-            Assert.Equal("Admin", actualAttribute[0].Roles);
+            Assert.Equal("Admin,Team_Owner", actualAttribute[0].Roles);
         }
 
         [Theory]

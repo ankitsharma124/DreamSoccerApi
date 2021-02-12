@@ -42,6 +42,8 @@ namespace DreamSoccerApi.E2E
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
 
             var teamPlayer = await Get_My_Team_Players(client);
+            var searchAllTeam = await Post_Search_All_Player(client);
+            Assert.True((teamPlayer.Value["data"]["players"] as JArray).Count == (searchAllTeam.Value["data"] as JArray).Count);
             await Post_Update_Team(client, teamPlayer.Value["data"], false);
             await Post_Update_Team(client, teamPlayer.Value["data"], false);
             var playerWillBeUpdate = (teamPlayer.Value["data"]["players"] as JArray)[0];
@@ -102,6 +104,8 @@ namespace DreamSoccerApi.E2E
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + userLogin.Value["data"]);
 
             var teamPlayer = await Get_My_Team_Players(client);
+            var searchAllTeam = await Post_Search_All_Player(client);
+            Assert.True((teamPlayer.Value["data"]["players"] as JArray).Count == (searchAllTeam.Value["data"] as JArray).Count);
             var updateTeam = await Post_Update_Team(client, teamPlayer.Value["data"], false);
             var updateTeamMakeSureWeCanUpdateAgain = await Post_Update_Team(client, teamPlayer.Value["data"], false);
             var playerWillBeUpdate = (teamPlayer.Value["data"]["players"] as JArray)[0];

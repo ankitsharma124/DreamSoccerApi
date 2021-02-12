@@ -7,5 +7,6 @@
         public string TeamName { get; set; }
         public long? MinValue { get; set; }
         public long? MaxValue { get; set; }
+        public int? TeamId { get; set; }
     }
 }

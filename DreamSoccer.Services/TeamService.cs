@@ -95,6 +95,11 @@ namespace DreamSoccer.Core.Contracts.Services
 
         public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(SearchPlayerFilter input)
         {
+            if(_currentUserRepository.Role == RoleEnum.Team_Owner)
+            {
+                var user = await _userRepository.GetByEmailAsync(_currentUserRepository.Email);
+                input.TeamId = user.TeamId;
+            }
             var players = await _playerRepository.SearchAsync(input);
             return _mapper.Map<List<PlayerDto>>(players);
         }

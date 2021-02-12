@@ -39,8 +39,9 @@ namespace DreamSoccer.Repository.Implementations
                     .Include(n => n.Team)
                         .ThenInclude(n => n.Players)
                     .Include(n => n.Team)
-                    .ThenInclude(n => n.Owner).
-                    WhereIf(!string.IsNullOrEmpty(input.Country), n => n.Country.Contains(input.Country))
+                    .ThenInclude(n => n.Owner)
+                    .WhereIf(input.TeamId != null && input.TeamId.Value > 0, n => n.TeamId == input.TeamId)
+                    .WhereIf(!string.IsNullOrEmpty(input.Country), n => n.Country.Contains(input.Country))
                     .WhereIf(!string.IsNullOrEmpty(input.PlayerName), n => n.FirstName.Contains(input.PlayerName) || n.LastName.Contains(input.PlayerName) || (n.FirstName + ' ' + n.LastName).Contains(input.PlayerName))
                     .WhereIf(!string.IsNullOrEmpty(input.TeamName), n => n.Team.TeamName.Contains(input.TeamName))
                     .WhereIf(input.MinValue != null, n => n.Value >= input.MinValue)

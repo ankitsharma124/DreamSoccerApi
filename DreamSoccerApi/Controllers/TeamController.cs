@@ -62,7 +62,7 @@ namespace DreamSoccerApi.Controllers
         }
 
         [HttpPost("GetAllPlayers")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Team_Owner")]
         public async Task<IActionResult> GetAllPlayers(SearchPlayerRequest request)
         {
             var response = new ServiceResponse<IEnumerable<PlayerDto>>();

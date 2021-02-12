@@ -119,6 +119,40 @@ namespace DreamSoccerApi_Test
             var actual = await service.GetAllPlayersAsync(input);
 
             // Assert
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Never());
+            playerRepository.Verify(mock => mock.SearchAsync(It.IsAny<SearchPlayerFilter>()), Times.Once());
+            Assert.True(actual.Any());
+        }
+
+        [Theory]
+        [InlineData(250000)]
+        public async Task GetAllPlayersAsync_When_Team_Owner_Return_Data(long maxValue)
+        {
+            // Arrange
+            var input = new SearchPlayerFilter
+            {
+                MaxValue = maxValue
+            };
+            var user = new User() { Email = "test1@email.com", TeamId = 2 };
+            userRepository.Setup(mock => mock.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
+            currentUserRepository.Setup(n => n.Role).Returns(RoleEnum.Team_Owner);
+            var players = new List<Player>();
+            players.Add(new Player()
+            {
+                FirstName = "Jhonatan",
+                Age = 20,
+                Position = DreamSoccer.Core.Entities.Enums.PositionEnum.Attackers,
+                Country = "UK"
+            });
+            playerRepository.Setup(m =>
+                  m.SearchAsync(It.IsAny<SearchPlayerFilter>())
+                ).Returns(Task.FromResult(players.AsQueryable()));
+
+            // Actual
+            var actual = await service.GetAllPlayersAsync(input);
+
+            // Assert
+            userRepository.Verify(mock => mock.GetByEmailAsync(It.IsAny<string>()), Times.Once());
             playerRepository.Verify(mock => mock.SearchAsync(It.IsAny<SearchPlayerFilter>()), Times.Once());
             Assert.True(actual.Any());
         }
